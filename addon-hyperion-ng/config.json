@@ -16,8 +16,8 @@
     },
     "ports_description": {
       "8090/tcp": "Web Admin",
+      "19333/tcp": "Boblight Server",
       "19400/tcp": "Google Flatbuffers Receiver",
-      "19433/tcp": "Boblight Server",
       "19444/tcp": "JSON-RPC Remote Control",
       "19445/tcp": "Protocol Buffers Server"
     },
@@ -26,5 +26,7 @@
     "options": {},
     "schema": {},
     "auto_uart": true,
-    "usb": true
+    "usb": true,
+    "webui": "http://[HOST]:[PORT:8090]",
+    "ingress": true
   }
