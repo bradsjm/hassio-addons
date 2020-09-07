@@ -1,0 +1,12 @@
+{
+    "build_from": {
+      "amd64": "homeassistant/amd64-base-debian:buster",
+      "armhf": "homeassistant/armhf-base-debian:buster"
+    },
+    "squash": false,
+    "args": {
+      "REGISTRY_URL": "ghcr.io/hyperion-project",
+      "BUILD_IMAGE": "x86_64",
+      "BUILD_TAG": "buster"
+    }
+  }
