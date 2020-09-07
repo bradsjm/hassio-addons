@@ -1,7 +1,7 @@
 language: minimal
 arch: amd64
 os: linux
-sudo: required
+dist: focal
 services:
   - docker
 env:
@@ -12,10 +12,9 @@ script: >
   -v ~/.docker:/root/.docker
   -v ${TRAVIS_BUILD_DIR}/${ADDON}:/data
   homeassistant/amd64-builder
-  -t /data
+  --target /data
   --no-cache
   --docker-user "${DOCKER_USER}"
   --docker-password "${DOCKER_PASSWORD}"
   --${ARCH}
 
-  
