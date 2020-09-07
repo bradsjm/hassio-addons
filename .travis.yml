@@ -5,7 +5,7 @@ sudo: required
 services:
   - docker
 env:
-  - ADDON="addon-hyperion-ng"
+  - ADDON="addon-hyperion-ng" ARCH="amd64"
 script: >
   docker run --rm --privileged
   -v /var/run/docker.sock:/var/run/docker.sock:ro
@@ -16,5 +16,6 @@ script: >
   --no-cache
   --docker-user "${DOCKER_USER}"
   --docker-password "${DOCKER_PASSWORD}"
-  --all
+  --${ARCH}
 
+  
