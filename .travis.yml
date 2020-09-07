@@ -6,14 +6,15 @@ services:
   - docker
 env:
   - ADDON="addon-hyperion-ng"
-script:
-  - docker run --rm --privileged \
-    -v /var/run/docker.sock:/var/run/docker.sock:ro \
-    -v ~/.docker:/root/.docker \
-    -v $(pwd)/${ADDON}:/data \
-    homeassistant/amd64-builder \
-    -t data \
-    --no-cache \
-    --docker-user ${DOCKER_USER} \
-    --docker-password ${DOCKER_PASSWORD} \
-    --all
+script: >
+  docker run --rm --privileged
+  -v /var/run/docker.sock:/var/run/docker.sock:ro
+  -v ~/.docker:/root/.docker
+  -v $(pwd)/${ADDON}:/data
+  homeassistant/amd64-builder
+  -t data
+  --no-cache
+  --docker-user "${DOCKER_USER}"
+  --docker-password "${DOCKER_PASSWORD}"
+  --all
+
