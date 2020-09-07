@@ -1,13 +1,17 @@
+language: minimal
+arch: amd64
+os: linux
 sudo: required
 services:
   - docker
 env:
   - ADDON="addon-hyperion-ng"
 script:
-  - docker run --rm --name hassio-builder --privileged \
+  - docker run --rm --privileged \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
-    -v ~/.docker:/root/.docker homeassistant/amd64-builder \
+    -v ~/.docker:/root/.docker \
     -v $(pwd)/${ADDON}:/data \
+    homeassistant/amd64-builder \
     -t data \
     --no-cache \
     --docker-user ${DOCKER_USER} \
