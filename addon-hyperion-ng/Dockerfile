@@ -1,13 +1,12 @@
-ARG BUILD_ARCH
-ARG BUILD_FROM
-ARG BUILD_VERSION
-
 ARG REGISTRY_URL
 ARG BUILD_IMAGE
 ARG BUILD_TAG
+ARG BUILD_FROM
 
 FROM ${REGISTRY_URL}/${BUILD_IMAGE}:${BUILD_TAG} as build
-ENV GIT_REPO_URL="https://github.com/hyperion-project/hyperion.ng.git"
+ARG BUILD_ARCH
+ARG BUILD_VERSION
+ARG GIT_REPO_URL
 RUN git clone --recursive --depth 1 -q ${GIT_REPO_URL} /hyperion || { echo "---> Failed to download Hyperion source code! Abort"; exit 1; }
 RUN /bin/bash -c "cd /hyperion && mkdir build && cd build && \
 	cmake -DCMAKE_BUILD_TYPE=Release \

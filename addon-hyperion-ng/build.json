@@ -5,6 +5,7 @@
     },
     "squash": false,
     "args": {
+      "GIT_REPO_URL": "https://github.com/hyperion-project/hyperion.ng.git",
       "REGISTRY_URL": "ghcr.io/hyperion-project",
       "BUILD_IMAGE": "x86_64",
       "BUILD_TAG": "buster"

@@ -1,6 +1,6 @@
 {
     "name": "Hyperion.NG",
-    "version": "1",
+    "version": "2.0.0-alpha.7",
     "slug": "hyperion.ng",
     "description": "Hyperion is an opensource Bias or Ambient Lighting implementation which you might know from TV manufacturers.",
     "url": "https://hyperion-project.org/",
