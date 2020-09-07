@@ -10,7 +10,6 @@ ARG GIT_REPO_URL
 RUN git clone --recursive --depth 1 -q ${GIT_REPO_URL} /hyperion || { echo "---> Failed to download Hyperion source code! Abort"; exit 1; }
 RUN /bin/bash -c "cd /hyperion && mkdir build && cd build && \
 	cmake -DCMAKE_BUILD_TYPE=Release \
-		  -DENABLE_QT=OFF -DENABLE_XCB=OFF -DENABLE_X11=OFF -DENABLE_CEC=OFF -DENABLE_V4L2=OFF -DENABLE_FB=OFF \
 		  .. || exit 2 && \
 	make -j $(nproc) || exit 3 && \
     strip /hyperion/build/bin/h* && \
@@ -32,6 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		libturbojpeg0 \
 		libssl1.1 \
 		zlib1g \
+		libcec4 \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=build /hyperion/build/bin/h* /hyperion/
 COPY run.sh /

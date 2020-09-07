@@ -2,10 +2,11 @@
     "name": "Hyperion.NG",
     "version": "2.0.0-alpha.7",
     "slug": "hyperion.ng",
-    "description": "Hyperion is an opensource Bias or Ambient Lighting implementation which you might know from TV manufacturers.",
+    "description": "Hyperion is an opensource Bias or Ambient Lighting implementation which you might know from TV manufacturers",
     "url": "https://hyperion-project.org/",
     "arch": ["amd64", "armhf"],
     "startup": "application",
+    "apparmor": false,
     "boot": "auto",
     "ports": {
       "8090/tcp": 8090,
@@ -27,5 +28,7 @@
     "schema": {},
     "auto_uart": true,
     "usb": true,
+    "video": true,
+    "gpio": true,
     "webui": "http://[HOST]:[PORT:8090]"
   }
