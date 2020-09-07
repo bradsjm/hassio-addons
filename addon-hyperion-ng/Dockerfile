@@ -7,14 +7,13 @@ FROM ${REGISTRY_URL}/${BUILD_IMAGE}:${BUILD_TAG} as build
 ARG BUILD_ARCH
 ARG BUILD_VERSION
 ARG GIT_REPO_URL
-RUN git clone --recursive --depth 1 -q ${GIT_REPO_URL} /hyperion || { echo "---> Failed to download Hyperion source code! Abort"; exit 1; }
+RUN git clone --recursive --depth 1 -q ${GIT_REPO_URL} /hyperion
 RUN /bin/bash -c "cd /hyperion && mkdir build && cd build && \
-	cmake -DCMAKE_BUILD_TYPE=Release \
-		  .. || exit 2 && \
+	cmake -DCMAKE_BUILD_TYPE=Release .. || exit 2 && \
 	make -j $(nproc) || exit 3 && \
     strip /hyperion/build/bin/h* && \
 	exit 0; \
-	exit 1 " || { echo "---> Hyperion compilation failed! Abort"; exit 4; }
+	exit 1" || { echo "---> Hyperion compilation failed! Abort"; exit 4; }
 
 
 FROM ${BUILD_FROM} as run

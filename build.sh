@@ -1,11 +1,13 @@
 #!/bin/sh
+ADDON=$1
+ARCH=$2
 
 docker run --rm --privileged \
-  -v $(PWD)/addon-hyperion-ng:/data \
+  -v $(PWD)/${ADDON}:/data \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   homeassistant/amd64-builder \
   -t /data \
-  -i hyperion-ng-addon-{arch} \
+  -i ${ADDON}-{arch} \
   -d bradsjm \
   --test \
-  $@
+  --${ARCH}
