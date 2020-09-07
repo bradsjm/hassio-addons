@@ -8,7 +8,7 @@
     "startup": "application",
     "boot": "auto",
     "ports": {
-      "8090/tcp": null,
+      "8090/tcp": 8090,
       "19333/tcp": 19333,
       "19400/tcp": 19400,
       "19444/tcp": 19444,
@@ -27,6 +27,5 @@
     "schema": {},
     "auto_uart": true,
     "usb": true,
-    "ingress": true,
-    "ingress_port": 8090
+    "webui": "http://[HOST]:[PORT:8090]"
   }
