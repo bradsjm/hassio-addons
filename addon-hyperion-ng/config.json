@@ -4,7 +4,7 @@
     "slug": "hyperion.ng",
     "description": "Hyperion is an opensource Bias or Ambient Lighting implementation which you might know from TV manufacturers",
     "url": "https://hyperion-project.org/",
-    "arch": ["amd64", "armhf", "aarch64", "armv7"],
+    "arch": ["amd64", "armhf", "aarch64", "armv7", "i386"],
     "startup": "application",
     "apparmor": false,
     "boot": "auto",

@@ -6,6 +6,10 @@ services:
   - docker
 env:
   - ADDON="addon-hyperion-ng" ARCH="amd64"
+  - ADDON="addon-hyperion-ng" ARCH="armhf"
+  - ADDON="addon-hyperion-ng" ARCH="armv7"
+  - ADDON="addon-hyperion-ng" ARCH="aarch64"
+  - ADDON="addon-hyperion-ng" ARCH="i386"
 script: >
   docker run --rm --privileged
   -v /var/run/docker.sock:/var/run/docker.sock:ro
