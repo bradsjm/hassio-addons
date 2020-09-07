@@ -10,6 +10,7 @@
     "boot": "auto",
     "ports": {
       "8090/tcp": 8090,
+      "8092/tcp": null,
       "19333/tcp": 19333,
       "19400/tcp": 19400,
       "19444/tcp": 19444,
@@ -17,6 +18,7 @@
     },
     "ports_description": {
       "8090/tcp": "Web Admin",
+      "8092/tcp": "SSL Web Admin",
       "19333/tcp": "Boblight Server",
       "19400/tcp": "Google Flatbuffers Receiver",
       "19444/tcp": "JSON-RPC Remote Control",
