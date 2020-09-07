@@ -1,6 +1,6 @@
 #!/bin/sh
 
-docker run --rm  --name hassio-builder--privileged \
+docker run --rm  --name hassio-builder --privileged \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v ~/.docker:/root/.docker homeassistant/amd64-builder \
   -r https://github.com/bradsjm/hassio-addons \
