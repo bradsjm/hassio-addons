@@ -1,37 +1,24 @@
-language: python
+language: minimal
 arch: amd64
 os: linux
 dist: focal
-
 services:
   - docker
-
-jobs:
-  include:
-  - name: deps
-    git:
-      depth: false  # required for existing deps branches to be available
-    install:
-    - ./scripts/install_requirements
-    - curl https://deps.app/install.sh | bash -s -- -b $HOME/bin
-    script: deps ci
-  - name: build
-    env:
-      - ADDON="addon-hyperion-ng" ARCH="amd64"
-      - ADDON="addon-hyperion-ng" ARCH="armhf"
-      - ADDON="addon-hyperion-ng" ARCH="armv7"
-      - ADDON="addon-hyperion-ng" ARCH="aarch64"
-      - ADDON="addon-hyperion-ng" ARCH="i386"
-    script: >
-      docker run --rm --privileged
-      -v /var/run/docker.sock:/var/run/docker.sock:ro
-      -v ~/.docker:/root/.docker
-      -v ${TRAVIS_BUILD_DIR}/${ADDON}:/data
-      homeassistant/amd64-builder
-      --target /data
-      --no-cache
-      --docker-user "${DOCKER_USER}"
-      --docker-password "${DOCKER_PASSWORD}"
-      --docker-hub-check
-      --${ARCH}
+env:
+  - ADDON="addon-hyperion-ng" ARCH="amd64"
+  - ADDON="addon-hyperion-ng" ARCH="armhf"
+  - ADDON="addon-hyperion-ng" ARCH="armv7"
+  - ADDON="addon-hyperion-ng" ARCH="aarch64"
+  - ADDON="addon-hyperion-ng" ARCH="i386"
+script: >
+  docker run --rm --privileged
+  -v /var/run/docker.sock:/var/run/docker.sock:ro
+  -v ~/.docker:/root/.docker
+  -v ${TRAVIS_BUILD_DIR}/${ADDON}:/data
+  homeassistant/amd64-builder
+  --target /data
+  --no-cache
+  --docker-user "${DOCKER_USER}"
+  --docker-password "${DOCKER_PASSWORD}"
+  --${ARCH}
 
