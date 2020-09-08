@@ -7,7 +7,7 @@ FROM ${REGISTRY_URL}/${BUILD_IMAGE}:${BUILD_TAG} as build
 ARG BUILD_ARCH
 ARG BUILD_VERSION
 ARG GIT_REPO_URL
-RUN git clone --recursive --depth 1 -q -b  ${BUILD_VERSION} ${GIT_REPO_URL} /hyperion
+RUN git clone --recursive --depth 1 -q ${GIT_REPO_URL} /hyperion
 RUN /bin/bash -c "cd /hyperion && mkdir build && cd build && \
 	cmake -DCMAKE_BUILD_TYPE=Release .. || exit 2 && \
 	make -j $(nproc) || exit 3 && \
