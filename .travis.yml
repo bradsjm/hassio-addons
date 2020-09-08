@@ -20,5 +20,6 @@ script: >
   --no-cache
   --docker-user "${DOCKER_USER}"
   --docker-password "${DOCKER_PASSWORD}"
+  --docker-hub-check
   --${ARCH}
 
