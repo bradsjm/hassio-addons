@@ -10,16 +10,4 @@ env:
   - ADDON="addon-hyperion-ng" ARCH="armv7"
   - ADDON="addon-hyperion-ng" ARCH="aarch64"
   - ADDON="addon-hyperion-ng" ARCH="i386"
-script: >
-  docker run --rm --privileged
-  -v /var/run/docker.sock:/var/run/docker.sock:ro
-  -v ~/.docker:/root/.docker
-  -v ${TRAVIS_BUILD_DIR}/${ADDON}:/data
-  homeassistant/amd64-builder
-  --target /data
-  --no-cache
-  --docker-user "${DOCKER_USER}"
-  --docker-password "${DOCKER_PASSWORD}"
-  --docker-hub-check
-  --${ARCH}
-
+script: ${TRAVIS_BUILD_DIR}/${ADDON}/build.sh
