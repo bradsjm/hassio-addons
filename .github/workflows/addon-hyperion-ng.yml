@@ -1,0 +1,47 @@
+name: 'Addon-Hyperion-NG'
+
+# Controls when the action will run
+on:
+  push
+#  schedule:
+#    - cron:  '0 0 * * 0' # Every Sunday
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Installs Node JS
+      - uses: actions/setup-node@v1
+
+      # Sync version to source
+      - run: ./scripts/update-hyperion-version.sh
+
+      - shell: bash
+        env:
+          DOCKER_USER: ${{ secrets.DOCKERHUB_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+        run: docker run --rm --privileged
+             -v /var/run/docker.sock:/var/run/docker.sock:ro
+             -v ~/.docker:/root/.docker
+             -v ${GITHUB_WORKSPACE}/addon-hyperion-ng:/data
+             homeassistant/amd64-builder
+             --target /data
+             --no-cache
+             --docker-user "${DOCKER_USER}"
+             --docker-password "${DOCKER_PASSWORD}"
+             --docker-hub-check
+             --all
+
+      # Commit changed version file
+      - uses: test-room-7/action-update-file@v1
+        with:
+          file-path: addon-hyperion-ng/config.json
+          commit-msg: Update version
+          github-token: ${{ secrets.GITHUB_TOKEN }}
