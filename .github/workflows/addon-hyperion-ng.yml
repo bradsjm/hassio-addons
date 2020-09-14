@@ -28,9 +28,9 @@ jobs:
       - name: Commit version file
         uses: test-room-7/action-update-file@v1
           with:
-              file-path: ./addon-hyperion-ng/config.json
-              commit-msg: Update version
-              github-token: ${{ secrets.GITHUB_TOKEN }}
+            file-path: ./addon-hyperion-ng/config.json
+            commit-msg: Update version
+            github-token: ${{ secrets.GITHUB_TOKEN }}
 
   # Build docker container
   build:
