@@ -25,8 +25,7 @@ jobs:
         run: ./scripts/update-hyperion-version.sh
 
       # Commit changed version file
-      - name: Commit version file
-        uses: test-room-7/action-update-file@v1
+      - uses: test-room-7/action-update-file@v1
           with:
             file-path: ./addon-hyperion-ng/config.json
             commit-msg: Update version
