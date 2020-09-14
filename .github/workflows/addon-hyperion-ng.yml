@@ -8,7 +8,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  checkversion:
+  build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -23,35 +23,25 @@ jobs:
       # Sync version to source
       - run: ./scripts/update-hyperion-version.sh
 
-      # Commit changed version file
-      - uses: test-room-7/action-update-file@v1
-        with:
-          file-path: ./addon-hyperion-ng/config.json
-          commit-msg: Update version
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-  # Build docker container
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-
       - shell: bash
         env:
           DOCKER_USER: ${{ secrets.DOCKERHUB_USER }}
           DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-        run: docker run --rm --privileged \
-             -v /var/run/docker.sock:/var/run/docker.sock:ro \
-             -v ~/.docker:/root/.docker \
-             -v ./addon-hyperion-ng:/data \
-             homeassistant/amd64-builder \
-             --target /data \
-             --no-cache \
-             --docker-user "${DOCKER_USER}" \
-             --docker-password "${DOCKER_PASSWORD}" \
-             --docker-hub-check \
+        run: docker run --rm --privileged
+             -v /var/run/docker.sock:/var/run/docker.sock:ro
+             -v ~/.docker:/root/.docker
+             -v ./addon-hyperion-ng:/data
+             homeassistant/amd64-builder
+             --target /data
+             --no-cache
+             --docker-user "${DOCKER_USER}"
+             --docker-password "${DOCKER_PASSWORD}"
+             --docker-hub-check
              --all
+
+      # Commit changed version file
+      - uses: test-room-7/action-update-file@v1
+        with:
+          file-path: addon-hyperion-ng/config.json
+          commit-msg: Update version
+          github-token: ${{ secrets.GITHUB_TOKEN }}
