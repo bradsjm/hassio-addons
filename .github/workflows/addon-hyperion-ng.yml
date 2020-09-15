@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v1
 
       # Sync version to source
-      - run: ./scripts/update-hyperion-version.sh
+      - run: ./.github/scripts/update-hyperion-version.sh
 
       - shell: bash
         env:
