@@ -36,9 +36,17 @@ jobs:
              --docker-hub-check
              --all
 
-      # Commit changed version file
       - uses: test-room-7/action-update-file@v1
         with:
           file-path: addon-hyperion-ng/config.json
           commit-msg: Update version
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: ${{ env.VERSION }}
+          draft: false
+          prerelease: true
