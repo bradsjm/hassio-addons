@@ -36,4 +36,6 @@ COPY --from=build /hyperion/build/bin/h* /hyperion/
 COPY run.sh /
 RUN chmod a+x /run.sh
 WORKDIR /hyperion
+VOLUME /config
+EXPOSE 8090 8092 19333 19400 19444 19445
 CMD [ "/run.sh" ]
