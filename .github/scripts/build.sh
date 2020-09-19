@@ -11,4 +11,4 @@ docker run --rm --privileged \
     --docker-user "${DOCKER_USER}" \
     --docker-password "${DOCKER_PASSWORD}" \
     --docker-hub-check \
-    $@
+    --$1
