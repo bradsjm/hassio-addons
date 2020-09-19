@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 BASE=${GITHUB_WORKSPACE}/addon-hyperion-ng
 
@@ -16,7 +15,4 @@ echo "::set-env name=RELEASE::${RELEASE}"
 if [ "${CURRENT}" != "${RELEASE}" ]; then
     jq ".version=\"${RELEASE}\"" $FILE > $FILE.tmp
     mv $FILE.tmp $FILE
-    exit 0
 fi
-
-exit 1

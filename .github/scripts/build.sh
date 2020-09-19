@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 docker run --rm --privileged \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
