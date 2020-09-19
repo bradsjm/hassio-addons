@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 BASE=${GITHUB_WORKSPACE}/addon-hyperion-ng
 
