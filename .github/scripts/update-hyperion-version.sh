@@ -1,6 +1,4 @@
 #!/bin/sh
-set -e
-set -o pipefail
 
 BASE=${GITHUB_WORKSPACE}/addon-hyperion-ng
 
