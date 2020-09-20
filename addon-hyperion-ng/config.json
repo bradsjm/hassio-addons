@@ -6,10 +6,8 @@
   "url": "https://hyperion-project.org/",
   "arch": [
     "amd64",
-    "armhf",
     "armv7",
-    "aarch64",
-    "i386"
+    "aarch64"
   ],
   "startup": "application",
   "apparmor": false,

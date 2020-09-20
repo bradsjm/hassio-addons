@@ -1,10 +1,9 @@
-ARG REGISTRY_URL
 ARG BUILD_TAG
 ARG BUILD_FROM
 ARG BUILD_ARCH
 
 # Use Hyperion CI Image defined in build.json to build from source
-FROM ${REGISTRY_URL}/${BUILD_ARCH}:${VERSION_TAG} as build
+FROM ${BUILD_FROM}:${VERSION_TAG} as build
 ARG BUILD_VERSION
 ARG GIT_REPO_URL
 RUN git clone --recursive --depth 1 -q ${GIT_REPO_URL} /hyperion
@@ -16,8 +15,8 @@ RUN /bin/bash -c "cd /hyperion && mkdir build && cd build && \
 	exit 1" || { echo "---> Hyperion compilation failed! Abort"; exit 4; }
 
 
-# Use Home Assistant base image defined in build.json for addon runtime
-FROM ${BUILD_FROM} as run
+# Use Home Assistant Debian base image for addon runtime
+FROM homeassistant/${BUILD_ARCH}-base-debian:${VERSION_TAG}
 ENV LANG C.UTF-8
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		libpython3.7 \
