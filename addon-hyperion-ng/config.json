@@ -5,11 +5,7 @@
   "description": "Hyperion is an opensource Bias or Ambient Lighting implementation",
   "url": "https://hyperion-project.org/",
   "arch": [
-    "amd64",
-    "armhf",
-    "aarch64",
-    "armv7",
-    "i386"
+    "amd64"
   ],
   "startup": "application",
   "apparmor": false,
