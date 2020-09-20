@@ -4,7 +4,6 @@ ARG VERSION_TAG
 
 # Use Hyperion CI Image defined in build.json to build from source
 FROM ${BUILD_FROM}:${VERSION_TAG} as build
-ARG BUILD_VERSION
 ARG GIT_REPO_URL
 RUN git clone --recursive --depth 1 -q ${GIT_REPO_URL} /hyperion
 RUN /bin/bash -c "cd /hyperion && mkdir build && cd build && \
