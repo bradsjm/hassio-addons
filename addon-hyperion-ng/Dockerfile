@@ -1,6 +1,6 @@
-ARG BUILD_TAG
 ARG BUILD_FROM
 ARG BUILD_ARCH
+ARG VERSION_TAG
 
 # Use Hyperion CI Image defined in build.json to build from source
 FROM ${BUILD_FROM}:${VERSION_TAG} as build
