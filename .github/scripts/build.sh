@@ -7,7 +7,6 @@ docker run --rm --privileged \
     -v ${GITHUB_WORKSPACE}/addon-hyperion-ng:/data \
     homeassistant/amd64-builder \
     --target /data \
-    --no-cache \
     --docker-user "${DOCKER_USER}" \
     --docker-password "${DOCKER_PASSWORD}" \
     --docker-hub-check \

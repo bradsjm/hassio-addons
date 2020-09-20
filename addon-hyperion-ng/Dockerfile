@@ -1,21 +1,11 @@
-ARG BUILD_FROM
 ARG BUILD_ARCH
-ARG VERSION_TAG
+ARG BUILD_TAG=buster
 
-# Use Hyperion CI Image defined in build.json to build from source
-FROM ${BUILD_FROM}:${VERSION_TAG} as build
-ARG GIT_REPO_URL
-RUN git clone --recursive --depth 1 -q ${GIT_REPO_URL} /hyperion
-RUN /bin/bash -c "cd /hyperion && mkdir build && cd build && \
-	cmake -DCMAKE_BUILD_TYPE=Release .. || exit 2 && \
-	make -j $(nproc) || exit 3 && \
-    strip /hyperion/build/bin/h* && \
-	exit 0; \
-	exit 1" || { echo "---> Hyperion compilation failed! Abort"; exit 4; }
+FROM homeassistant/${BUILD_ARCH}-base-debian:${BUILD_TAG}
+ARG DOWNLOAD_URL
+ARG BUILD_VERSION
+ARG BUILD_FROM
 
-
-# Use Home Assistant Debian base image for addon runtime
-FROM homeassistant/${BUILD_ARCH}-base-debian:${VERSION_TAG}
 ENV LANG C.UTF-8
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		libpython3.7 \
@@ -30,11 +20,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		libssl1.1 \
 		zlib1g \
 		libcec4 \
+		wget \
     && rm -rf /var/lib/apt/lists/*
-COPY --from=build /hyperion/build/bin/h* /hyperion/
 COPY run.sh /
 RUN chmod a+x /run.sh
-WORKDIR /hyperion
+
+ENV PKG ${DOWNLOAD_URL}/${BUILD_VERSION}/Hyperion-${BUILD_VERSION}-${BUILD_FROM}
+RUN wget -q -O /tmp/hyperion.deb ${PKG} && \
+	dpkg -i /tmp/hyperion.deb && \
+	rm /tmp/hyperion.deb
+
 VOLUME /config
 EXPOSE 8090 8092 19333 19400 19444 19445
 CMD [ "/run.sh" ]

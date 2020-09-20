@@ -1,12 +1,11 @@
 {
     "build_from": {
-      "amd64": "ghcr.io/hyperion-project/x86_64",
-      "armv7": "ghcr.io/hyperion-project/armv7l",
-      "aarch64": "ghcr.io/hyperion-project/aarch64"
+      "amd64": "Linux-x86_64.deb",
+      "armv7": "Linux-armv7l.deb",
+      "aarch64": "Linux-aarch64.deb"
     },
     "squash": false,
     "args": {
-      "GIT_REPO_URL": "https://github.com/hyperion-project/hyperion.ng.git",
-      "VERSION_TAG": "buster"
+      "DOWNLOAD_URL": "https://github.com/hyperion-project/hyperion.ng/releases/download"
     }
   }
