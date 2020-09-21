@@ -1,7 +1,6 @@
 ARG BUILD_ARCH
-ARG BUILD_TAG=buster
 
-FROM homeassistant/${BUILD_ARCH}-base-debian:${BUILD_TAG}
+FROM homeassistant/${BUILD_ARCH}-base-ubuntu
 ARG DOWNLOAD_URL
 ARG BUILD_VERSION
 ARG BUILD_FROM
@@ -16,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		libavahi-core7 \
 		libavahi-compat-libdnssd1 \
 		libusb-1.0-0 \
-		libturbojpeg0 \
+		libturbojpeg \
 		libssl1.1 \
 		zlib1g \
 		libcec4 \
