@@ -6,6 +6,7 @@
   "url": "https://hyperion-project.org/",
   "arch": [
     "amd64",
+    "armhf",
     "armv7",
     "aarch64"
   ],
