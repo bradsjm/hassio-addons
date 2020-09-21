@@ -30,12 +30,14 @@ jobs:
              ./.github/scripts/build.sh aarch64
 
       - uses: test-room-7/action-update-file@v1
+        if: ${{ env.VERSION != env.RELEASE }}
         with:
           file-path: addon-hyperion-ng/config.json
           commit-msg: Update version
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/create-release@v1
+        if: ${{ env.VERSION != env.RELEASE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
