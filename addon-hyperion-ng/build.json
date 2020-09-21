@@ -1,6 +1,7 @@
 {
     "build_from": {
       "amd64": "Linux-x86_64.deb",
+      "armhf": "Linux-armv6l.deb",
       "armv7": "Linux-armv7l.deb",
       "aarch64": "Linux-aarch64.deb"
     },

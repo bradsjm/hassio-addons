@@ -25,6 +25,7 @@ jobs:
           DOCKER_USER: ${{ secrets.DOCKERHUB_USER }}
           DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
         run: ./.github/scripts/build.sh amd64 &&
+             ./.github/scripts/build.sh armhf &&
              ./.github/scripts/build.sh armv7 &&
              ./.github/scripts/build.sh aarch64
 
