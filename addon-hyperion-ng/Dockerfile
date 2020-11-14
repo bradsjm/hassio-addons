@@ -1,6 +1,6 @@
 ARG BUILD_ARCH
 
-FROM homeassistant/${BUILD_ARCH}-base-ubuntu
+FROM homeassistant/${BUILD_ARCH}-base-debian
 ARG DOWNLOAD_URL
 ARG BUILD_VERSION
 ARG BUILD_FROM
@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		libavahi-core7 \
 		libavahi-compat-libdnssd1 \
 		libusb-1.0-0 \
-		libturbojpeg \
+		libjpeg-dev \
 		libssl1.1 \
 		zlib1g \
 		libcec4 \
@@ -26,7 +26,7 @@ RUN chmod a+x /run.sh
 
 ENV PKG ${DOWNLOAD_URL}/${BUILD_VERSION}/Hyperion-${BUILD_VERSION}-${BUILD_FROM}
 RUN wget -q -O /tmp/hyperion.deb ${PKG} && \
-	dpkg -i /tmp/hyperion.deb && \
+	dpkg --force architecture -i /tmp/hyperion.deb && \
 	rm /tmp/hyperion.deb
 
 VOLUME /config
