@@ -1,12 +1,11 @@
 {
-    "build_from": {
-      "amd64": "Linux-x86_64.deb",
-      "armhf": "Linux-armv6l.deb",
-      "armv7": "Linux-armv7l.deb",
-      "aarch64": "Linux-aarch64.deb"
-    },
-    "squash": false,
-    "args": {
-      "DOWNLOAD_URL": "https://github.com/hyperion-project/hyperion.ng/releases/download"
-    }
+  "build_from": {
+    "amd64": "homeassistant/amd64-base-debian",
+    "armhf": "homeassistant/armhf-base-raspbian",
+    "aarch64": "homeassistant/aarch64-base-debian"
+  },
+  "squash": false,
+  "args": {
+    "DOWNLOAD_URL": "https://github.com/hyperion-project/hyperion.ng/releases/download"
   }
+}

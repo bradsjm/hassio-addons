@@ -1,9 +1,9 @@
-ARG BUILD_ARCH
+ARG BUILD_FROM
 
-FROM homeassistant/${BUILD_ARCH}-base-debian
+FROM ${BUILD_FROM}
 ARG DOWNLOAD_URL
 ARG BUILD_VERSION
-ARG BUILD_FROM
+ARG BUILD_ARCH
 
 ENV LANG C.UTF-8
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -24,10 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY run.sh /
 RUN chmod a+x /run.sh
 
-ENV PKG ${DOWNLOAD_URL}/${BUILD_VERSION}/Hyperion-${BUILD_VERSION}-${BUILD_FROM}
-RUN wget -q -O /tmp/hyperion.deb ${PKG} && \
-	dpkg --force architecture -i /tmp/hyperion.deb && \
-	rm /tmp/hyperion.deb
+RUN wget -q "${DOWNLOAD_URL}/${BUILD_VERSION}/Hyperion-${BUILD_VERSION}-Linux-$(uname -m).tar.gz" -O - | tar -xvz -C /usr
 
 VOLUME /config
 EXPOSE 8090 8092 19333 19400 19444 19445
