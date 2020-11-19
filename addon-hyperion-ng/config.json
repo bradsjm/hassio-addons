@@ -1,15 +1,10 @@
 {
   "name": "Hyperion.NG",
-  "version": "2.0.0-alpha.8",
+  "version": "2.0.0-alpha.9",
   "slug": "hyperion.ng",
   "description": "Hyperion is an opensource Bias or Ambient Lighting implementation",
   "url": "https://hyperion-project.org/",
-  "arch": [
-    "amd64",
-    "armhf",
-    "armv7",
-    "aarch64"
-  ],
+  "arch": ["amd64", "armhf", "aarch64"],
   "startup": "application",
   "apparmor": false,
   "boot": "auto",
@@ -29,9 +24,7 @@
     "19444/tcp": "JSON-RPC Remote Control",
     "19445/tcp": "Protocol Buffers Server"
   },
-  "map": [
-    "config:rw"
-  ],
+  "map": ["config:rw"],
   "image": "bradsjm/hyperion-ng-addon-{arch}",
   "options": {},
   "schema": {},
@@ -39,8 +32,6 @@
   "usb": true,
   "video": true,
   "gpio": true,
-  "devices": [
-    "/dev/spidev0.0:/dev/spidev0.0:rwm"
-  ],
+  "devices": ["/dev/spidev0.0:/dev/spidev0.0:rwm"],
   "webui": "http://[HOST]:[PORT:8090]"
 }
