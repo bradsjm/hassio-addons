@@ -20,7 +20,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		zlib1g \
 		libcec4 \
 		wget \
-    && rm -rf /var/lib/apt/lists/*
+		v4l-utils \
+	&& rm -rf /var/lib/apt/lists/*
 COPY run.sh /
 RUN chmod a+x /run.sh
 
