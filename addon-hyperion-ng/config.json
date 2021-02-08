@@ -1,7 +1,7 @@
 {
   "name": "Hyperion.NG",
   "version": "2.0.0-alpha.9",
-  "slug": "hyperion.ng",
+  "slug": "hyperion-ng",
   "description": "Hyperion is an opensource Bias or Ambient Lighting implementation",
   "url": "https://hyperion-project.org/",
   "arch": ["amd64", "armhf", "aarch64"],
