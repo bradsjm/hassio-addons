@@ -28,7 +28,7 @@
   "image": "bradsjm/hyperion-ng-addon-{arch}",
   "options": {},
   "schema": {},
-  "auto_uart": true,
+  "uart": true,
   "usb": true,
   "video": true,
   "gpio": true,
