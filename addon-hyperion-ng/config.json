@@ -32,6 +32,6 @@
   "usb": true,
   "video": true,
   "gpio": true,
-  "devices": ["/dev/spidev0.0"],
+  "devices": ["/dev/spidev0.0","/dev/vchiq","/dev/amvideo","/dev/fb0"],
   "webui": "http://[HOST]:[PORT:8090]"
 }
