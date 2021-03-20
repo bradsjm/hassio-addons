@@ -28,6 +28,7 @@
   "image": "bradsjm/hyperion-ng-addon-{arch}",
   "options": {},
   "schema": {},
+  "privileged": ["SYS_ADMIN","SYS_RAWIO"],
   "uart": true,
   "usb": true,
   "video": true,
