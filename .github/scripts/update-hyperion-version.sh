@@ -8,7 +8,7 @@ CURRENT="$(jq -r ".version" $FILE)"
 echo "VERSION=${CURRENT}" >> $GITHUB_ENV
 
 REPO="https://github.com/hyperion-project/hyperion.ng.git"
-RELEASE="$(git ls-remote --tags ${REPO} | cut -d/ -f3- | tail -n1)"
+RELEASE="$(git ls-remote --sort='v:refname' --tags ${REPO} | cut -d/ -f3- | tail -n1)"
 
 echo "RELEASE=${RELEASE}" >> $GITHUB_ENV
 
