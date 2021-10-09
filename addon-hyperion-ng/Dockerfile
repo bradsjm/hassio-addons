@@ -7,7 +7,6 @@ ARG BUILD_ARCH
 
 ENV LANG C.UTF-8
 RUN apt-get update && apt-get install -y --no-install-recommends \
-		libpython3.7 \
 		libqt5widgets5 \
 		libqt5serialport5 \
 		libqt5sql5-sqlite \
