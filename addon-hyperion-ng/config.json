@@ -1,10 +1,14 @@
 {
   "name": "Hyperion.NG",
-  "version": "2.0.0-alpha.11",
+  "version": "2.0.12",
   "slug": "hyperionng",
   "description": "Hyperion is an opensource Bias or Ambient Lighting implementation by the Hyperion-Project. This add-on is not supported or endorsed by the Hyperion Project and may not work with hardware capture cards or LED devices due to limitations of containers",
   "url": "https://hyperion-project.org/",
-  "arch": ["amd64", "armhf", "aarch64"],
+  "arch": [
+    "amd64",
+    "armhf",
+    "aarch64"
+  ],
   "startup": "application",
   "apparmor": false,
   "boot": "auto",
@@ -24,11 +28,16 @@
     "19444/tcp": "JSON-RPC Remote Control",
     "19445/tcp": "Protocol Buffers Server"
   },
-  "map": ["config:rw"],
+  "map": [
+    "config:rw"
+  ],
   "image": "bradsjm/hyperion-ng-addon-{arch}",
   "options": {},
   "schema": {},
-  "privileged": ["SYS_ADMIN", "SYS_RAWIO"],
+  "privileged": [
+    "SYS_ADMIN",
+    "SYS_RAWIO"
+  ],
   "uart": true,
   "usb": true,
   "video": true,
