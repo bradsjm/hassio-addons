@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		libjpeg-dev \
 		libssl1.1 \
 		zlib1g \
-		libcec4 \
+		libcec6 \
 		wget \
 		v4l-utils \
 	&& rm -rf /var/lib/apt/lists/*
