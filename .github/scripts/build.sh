@@ -9,6 +9,5 @@ docker run --rm --privileged \
     --target /data \
     --docker-user "${DOCKER_USER}" \
     --docker-password "${DOCKER_PASSWORD}" \
-    --docker-hub-check \
     --no-latest \
     --${ARCH:-all}
