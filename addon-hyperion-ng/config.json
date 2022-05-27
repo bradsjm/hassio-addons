@@ -49,5 +49,6 @@
     "/dev/fb0",
     "/dev/mem"
   ],
-  "webui": "http://[HOST]:[PORT:8090]"
+  "webui": "http://[HOST]:[PORT:8090]",
+  "init": false
 }
