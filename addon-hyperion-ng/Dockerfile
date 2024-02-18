@@ -24,10 +24,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY run.sh /
 RUN chmod a+x /run.sh
 
-RUN set -eux; \
-    if ! wget -q "${DOWNLOAD_URL}/${BUILD_VERSION}/Hyperion-${BUILD_VERSION}-Linux-$(uname -m).tar.gz" -O - | tar -xvz -C /usr; then \
-        wget -q "${DOWNLOAD_URL}/${BUILD_VERSION}/Hyperion-${BUILD_VERSION}-Linux-${BUILD_ARCH}.tar.gz" -O - | tar -xvz -C /usr; \
-    fi
+RUN case "${BUILD_ARCH}" in \
+    amd64) ARCH="amd64" ;; \
+    armhf) ARCH="armv7" ;; \
+    aarch64) ARCH="arm64" ;; \
+    *) echo "Unsupported architecture: ${BUILD_ARCH}" >&2; exit 1 ;; \
+    esac && \
+    wget -q "${DOWNLOAD_URL}/${BUILD_VERSION}/Hyperion-${BUILD_VERSION}-Linux-${ARCH}.tar.gz" -O - | tar -xvz -C /usr
 
 VOLUME /config
 EXPOSE 8090 8092 19333 19400 19444 19445
