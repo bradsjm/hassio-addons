@@ -35,7 +35,7 @@ jobs:
           commit-msg: Update version
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/create-release@v1
+      - uses: ncipollo/release-action@v1.14.0
         if: ${{ env.VERSION != env.RELEASE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
