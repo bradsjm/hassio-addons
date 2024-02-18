@@ -26,7 +26,7 @@ RUN chmod a+x /run.sh
 
 RUN set -eux; \
     if ! wget -q "${DOWNLOAD_URL}/${BUILD_VERSION}/Hyperion-${BUILD_VERSION}-Linux-$(uname -m).tar.gz" -O - | tar -xvz -C /usr; then \
-        wget -q "${DOWNLOAD_URL}/${BUILD_VERSION}/Hyperion-${BUILD_VERSION}-Linux-${ARCH}.tar.gz" -O - | tar -xvz -C /usr; \
+        wget -q "${DOWNLOAD_URL}/${BUILD_VERSION}/Hyperion-${BUILD_VERSION}-Linux-${BUILD_ARCH}.tar.gz" -O - | tar -xvz -C /usr; \
     fi
 
 VOLUME /config
