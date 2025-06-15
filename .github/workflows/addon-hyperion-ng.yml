@@ -144,7 +144,7 @@ jobs:
           tag: ${{ needs.validate.outputs.release }}
           name: Hyperion.NG ${{ needs.validate.outputs.release }}
           draft: false
-          prerelease: true
+          prerelease: false
           body: |
             ## Hyperion.NG Add-on Release ${{ needs.validate.outputs.release }}
             
