@@ -19,18 +19,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		zlib1g \
 		libcec6 \
 		wget \
+		curl \
 		v4l-utils \
 	&& rm -rf /var/lib/apt/lists/*
 COPY run.sh /
-RUN chmod a+x /run.sh
+COPY download-hyperion.sh /usr/local/bin/
+RUN chmod a+x /run.sh /usr/local/bin/download-hyperion.sh
 
-RUN case "${BUILD_ARCH}" in \
-    amd64) ARCH="amd64" ;; \
-    armhf) ARCH="armv7" ;; \
-    aarch64) ARCH="arm64" ;; \
-    *) echo "Unsupported architecture: ${BUILD_ARCH}" >&2; exit 1 ;; \
-    esac && \
-    wget -q "${DOWNLOAD_URL}/${BUILD_VERSION}/Hyperion-${BUILD_VERSION}-Linux-${ARCH}.tar.gz" -O - | tar -xvz -C /usr
+# Download and install Hyperion using robust download script
+RUN echo "Installing Hyperion ${BUILD_VERSION} for ${BUILD_ARCH}..." && \
+    /usr/local/bin/download-hyperion.sh "${BUILD_VERSION}" "${BUILD_ARCH}" /usr && \
+    \
+    # Final verification
+    if [ -f /usr/bin/hyperiond ]; then \
+        echo "Hyperion installation verified successfully"; \
+        /usr/bin/hyperiond --version || echo "Version check failed (may be normal)"; \
+    else \
+        echo "ERROR: Hyperion daemon not found after installation" >&2; \
+        echo "Searching for hyperion binaries..." && \
+        find /usr -name "*hyperion*" -type f 2>/dev/null || true; \
+        exit 1; \
+    fi
 
 VOLUME /config
 EXPOSE 8090 8092 19333 19400 19444 19445
