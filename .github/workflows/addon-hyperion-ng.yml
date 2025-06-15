@@ -43,10 +43,19 @@ jobs:
           echo "Current version: $CURRENT_VERSION"
           echo "Latest release: $LATEST_RELEASE"
           
+          # Calculate should_build
+          if [ "$CURRENT_VERSION" != "$LATEST_RELEASE" ]; then
+            SHOULD_BUILD="true"
+          else
+            SHOULD_BUILD="false"
+          fi
+          
+          echo "Should build: $SHOULD_BUILD (current: $CURRENT_VERSION, latest: $LATEST_RELEASE)"
+          
           # Set outputs
           echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "release=$LATEST_RELEASE" >> $GITHUB_OUTPUT
-          echo "should_build=$([ "$CURRENT_VERSION" != "$LATEST_RELEASE" ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "should_build=$SHOULD_BUILD" >> $GITHUB_OUTPUT
           
           # Also set environment variables for later steps
           echo "VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
@@ -56,7 +65,7 @@ jobs:
     name: 'Build Add-on'
     runs-on: ubuntu-latest
     needs: validate
-    if: needs.validate.outputs.should_build == 'true' || github.event.inputs.test_mode == 'true'
+    if: ${{ needs.validate.outputs.should_build == 'true' || github.event.inputs.test_mode == 'true' }}
     strategy:
       matrix:
         arch: [amd64, armhf, aarch64]
@@ -93,7 +102,7 @@ jobs:
     name: 'Update Release'
     runs-on: ubuntu-latest
     needs: [validate, build]
-    if: needs.validate.outputs.should_build == 'true' && github.event.inputs.test_mode != 'true'
+    if: ${{ needs.validate.outputs.should_build == 'true' && github.event.inputs.test_mode != 'true' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
