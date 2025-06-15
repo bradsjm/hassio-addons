@@ -1,163 +1,163 @@
-name: 'Addon-Hyperion-NG'
+name: "Addon-Hyperion-NG"
 
 # Controls when the action will run
-on: 
-  workflow_dispatch:
-    inputs:
-      test_mode:
-        description: 'Run in test mode (skip Docker push)'
-        required: false
-        default: 'false'
-        type: boolean
+on:
+    workflow_dispatch:
+        inputs:
+            test_mode:
+                description: "Run in test mode (skip Docker push)"
+                required: false
+                default: false
+                type: boolean
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  validate:
-    name: 'Validate Release'
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      release: ${{ steps.version.outputs.release }}
-      should_build: ${{ steps.version.outputs.should_build }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq curl
-          
-      - name: Validate and get version info
-        id: version
-        run: |
-          # Get current version BEFORE any updates
-          CURRENT_VERSION=$(jq -r '.version' addon-hyperion-ng/config.json)
-          LATEST_RELEASE=$(curl -s --fail --connect-timeout 10 --max-time 30 "https://api.github.com/repos/hyperion-project/hyperion.ng/releases/latest" | jq -r '.tag_name // empty')
-          
-          echo "Current version: $CURRENT_VERSION"
-          echo "Latest release: $LATEST_RELEASE"
-          
-          # Calculate should_build BEFORE updating anything
-          if [ "$CURRENT_VERSION" != "$LATEST_RELEASE" ]; then
-            SHOULD_BUILD="true"
-          else
-            SHOULD_BUILD="false"
-          fi
-          
-          echo "Should build: $SHOULD_BUILD (current: $CURRENT_VERSION, latest: $LATEST_RELEASE)"
-          
-          # Set outputs first
-          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          echo "release=$LATEST_RELEASE" >> $GITHUB_OUTPUT
-          echo "should_build=$SHOULD_BUILD" >> $GITHUB_OUTPUT
-          
-          # Set environment variables
-          echo "VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
-          echo "RELEASE=$LATEST_RELEASE" >> $GITHUB_ENV
-          
-          # Only run update script if we need to build (and we're not in test mode)
-          if [ "$SHOULD_BUILD" = "true" ] && [ "${{ github.event.inputs.test_mode }}" != "true" ]; then
-            echo "Running update script to prepare for build..."
-            chmod +x ./.github/scripts/update-hyperion-version.sh
-            ./.github/scripts/update-hyperion-version.sh
-          else
-            echo "Skipping config update (no build needed or in test mode)"
-          fi
+    validate:
+        name: "Validate Release"
+        runs-on: ubuntu-latest
+        outputs:
+            version: ${{ steps.version.outputs.version }}
+            release: ${{ steps.version.outputs.release }}
+            should_build: ${{ steps.version.outputs.should_build }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-  build:
-    name: 'Build Add-on'
-    runs-on: ubuntu-latest
-    needs: validate
-    if: ${{ needs.validate.outputs.should_build == 'true' || github.event.inputs.test_mode == 'true' }}
-    strategy:
-      matrix:
-        arch: [amd64, armhf, aarch64]
-      fail-fast: false
+            - name: Install dependencies
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y jq curl
 
-    steps:
-      - name: Checkout repository  
-        uses: actions/checkout@v4
+            - name: Validate and get version info
+              id: version
+              run: |
+                  # Get current version BEFORE any updates
+                  CURRENT_VERSION=$(jq -r '.version' addon-hyperion-ng/config.json)
+                  LATEST_RELEASE=$(curl -s --fail --connect-timeout 10 --max-time 30 "https://api.github.com/repos/hyperion-project/hyperion.ng/releases/latest" | jq -r '.tag_name // empty')
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq curl
+                  echo "Current version: $CURRENT_VERSION"
+                  echo "Latest release: $LATEST_RELEASE"
 
-      # Test download script before building
-      - name: Test download script
-        run: |
-          chmod +x ./addon-hyperion-ng/download-hyperion.sh
-          # Test download to temporary location
-          mkdir -p /tmp/test-download
-          ./addon-hyperion-ng/download-hyperion.sh "${{ needs.validate.outputs.release }}" "${{ matrix.arch }}" /tmp/test-download
-          echo "Download test successful for ${{ matrix.arch }}"
+                  # Calculate should_build BEFORE updating anything
+                  if [ "$CURRENT_VERSION" != "$LATEST_RELEASE" ]; then
+                    SHOULD_BUILD="true"
+                  else
+                    SHOULD_BUILD="false"
+                  fi
 
-      # Update config.json to use the correct version for building
-      - name: Update config for build
-        if: github.event.inputs.test_mode != 'true'
-        run: |
-          echo "Updating config.json version for build: ${{ needs.validate.outputs.release }}"
-          jq ".version=\"${{ needs.validate.outputs.release }}\"" addon-hyperion-ng/config.json > addon-hyperion-ng/config.json.tmp
-          mv addon-hyperion-ng/config.json.tmp addon-hyperion-ng/config.json
-          echo "Config updated:"
-          jq '.version' addon-hyperion-ng/config.json
+                  echo "Should build: $SHOULD_BUILD (current: $CURRENT_VERSION, latest: $LATEST_RELEASE)"
 
-      - name: Build Docker image
-        if: github.event.inputs.test_mode != 'true'
-        env:
-          DOCKER_USER: ${{ secrets.DOCKERHUB_USER }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-        run: |
-          chmod +x ./.github/scripts/build.sh
-          ./.github/scripts/build.sh ${{ matrix.arch }}
+                  # Set outputs first
+                  echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+                  echo "release=$LATEST_RELEASE" >> $GITHUB_OUTPUT
+                  echo "should_build=$SHOULD_BUILD" >> $GITHUB_OUTPUT
 
-  release:
-    name: 'Update Release'
-    runs-on: ubuntu-latest
-    needs: [validate, build]
-    if: ${{ needs.validate.outputs.should_build == 'true' && github.event.inputs.test_mode != 'true' }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: Update config.json version
-        run: |
-          echo "Updating config.json from ${{ needs.validate.outputs.version }} to ${{ needs.validate.outputs.release }}"
-          jq ".version=\"${{ needs.validate.outputs.release }}\"" addon-hyperion-ng/config.json > addon-hyperion-ng/config.json.tmp
-          mv addon-hyperion-ng/config.json.tmp addon-hyperion-ng/config.json
-          echo "Updated config.json:"
-          jq '.version' addon-hyperion-ng/config.json
-        
-      - name: Commit version update
-        uses: test-room-7/action-update-file@v1
-        with:
-          file-path: addon-hyperion-ng/config.json
-          commit-msg: Update version to ${{ needs.validate.outputs.release }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+                  # Set environment variables
+                  echo "VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+                  echo "RELEASE=$LATEST_RELEASE" >> $GITHUB_ENV
 
-      - name: Create GitHub release
-        uses: ncipollo/release-action@v1.14.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag: ${{ needs.validate.outputs.release }}
-          name: Hyperion.NG ${{ needs.validate.outputs.release }}
-          draft: false
-          prerelease: false
-          body: |
-            ## Hyperion.NG Add-on Release ${{ needs.validate.outputs.release }}
-            
-            This release updates the Hyperion.NG add-on to version ${{ needs.validate.outputs.release }}.
-            
-            ### Changes
-            - Updated Hyperion.NG to version ${{ needs.validate.outputs.release }}
-            - Improved download reliability and error handling
-            - Enhanced architecture support and validation
-            
-            ### Supported Architectures
-            - amd64 (x86_64)
-            - armhf (armv7l) 
-            - aarch64 (arm64)
-            
-            🤖 Generated with [Claude Code](https://claude.ai/code)
+                  # Only run update script if we need to build (and we're not in test mode)
+                  if [ "$SHOULD_BUILD" = "true" ] && [ "${{ github.event.inputs.test_mode }}" != "true" ]; then
+                    echo "Running update script to prepare for build..."
+                    chmod +x ./.github/scripts/update-hyperion-version.sh
+                    ./.github/scripts/update-hyperion-version.sh
+                  else
+                    echo "Skipping config update (no build needed or in test mode)"
+                  fi
+
+    build:
+        name: "Build Add-on"
+        runs-on: ubuntu-latest
+        needs: validate
+        if: ${{ needs.validate.outputs.should_build == 'true' || github.event.inputs.test_mode == 'true' }}
+        strategy:
+            matrix:
+                arch: [amd64, armhf, aarch64]
+            fail-fast: false
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Install dependencies
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y jq curl
+
+            # Test download script before building
+            - name: Test download script
+              run: |
+                  chmod +x ./addon-hyperion-ng/download-hyperion.sh
+                  # Test download to temporary location
+                  mkdir -p /tmp/test-download
+                  ./addon-hyperion-ng/download-hyperion.sh "${{ needs.validate.outputs.release }}" "${{ matrix.arch }}" /tmp/test-download
+                  echo "Download test successful for ${{ matrix.arch }}"
+
+            # Update config.json to use the correct version for building
+            - name: Update config for build
+              if: github.event.inputs.test_mode != 'true'
+              run: |
+                  echo "Updating config.json version for build: ${{ needs.validate.outputs.release }}"
+                  jq ".version=\"${{ needs.validate.outputs.release }}\"" addon-hyperion-ng/config.json > addon-hyperion-ng/config.json.tmp
+                  mv addon-hyperion-ng/config.json.tmp addon-hyperion-ng/config.json
+                  echo "Config updated:"
+                  jq '.version' addon-hyperion-ng/config.json
+
+            - name: Build Docker image
+              if: github.event.inputs.test_mode != 'true'
+              env:
+                  DOCKER_USER: ${{ secrets.DOCKERHUB_USER }}
+                  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+              run: |
+                  chmod +x ./.github/scripts/build.sh
+                  ./.github/scripts/build.sh ${{ matrix.arch }}
+
+    release:
+        name: "Update Release"
+        runs-on: ubuntu-latest
+        needs: [validate, build]
+        if: ${{ needs.validate.outputs.should_build == 'true' && github.event.inputs.test_mode != 'true' }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Update config.json version
+              run: |
+                  echo "Updating config.json from ${{ needs.validate.outputs.version }} to ${{ needs.validate.outputs.release }}"
+                  jq ".version=\"${{ needs.validate.outputs.release }}\"" addon-hyperion-ng/config.json > addon-hyperion-ng/config.json.tmp
+                  mv addon-hyperion-ng/config.json.tmp addon-hyperion-ng/config.json
+                  echo "Updated config.json:"
+                  jq '.version' addon-hyperion-ng/config.json
+
+            - name: Commit version update
+              uses: test-room-7/action-update-file@v1
+              with:
+                  file-path: addon-hyperion-ng/config.json
+                  commit-msg: Update version to ${{ needs.validate.outputs.release }}
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Create GitHub release
+              uses: ncipollo/release-action@v1.14.0
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag: ${{ needs.validate.outputs.release }}
+                  name: Hyperion.NG ${{ needs.validate.outputs.release }}
+                  draft: false
+                  prerelease: false
+                  body: |
+                      ## Hyperion.NG Add-on Release ${{ needs.validate.outputs.release }}
+
+                      This release updates the Hyperion.NG add-on to version ${{ needs.validate.outputs.release }}.
+
+                      ### Changes
+                      - Updated Hyperion.NG to version ${{ needs.validate.outputs.release }}
+                      - Improved download reliability and error handling
+                      - Enhanced architecture support and validation
+
+                      ### Supported Architectures
+                      - amd64 (x86_64)
+                      - armhf (armv7l)
+                      - aarch64 (arm64)
+
+                      🤖 Generated with [Claude Code](https://claude.ai/code)
