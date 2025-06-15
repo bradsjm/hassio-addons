@@ -93,6 +93,16 @@ jobs:
           ./addon-hyperion-ng/download-hyperion.sh "${{ needs.validate.outputs.release }}" "${{ matrix.arch }}" /tmp/test-download
           echo "Download test successful for ${{ matrix.arch }}"
 
+      # Update config.json to use the correct version for building
+      - name: Update config for build
+        if: github.event.inputs.test_mode != 'true'
+        run: |
+          echo "Updating config.json version for build: ${{ needs.validate.outputs.release }}"
+          jq ".version=\"${{ needs.validate.outputs.release }}\"" addon-hyperion-ng/config.json > addon-hyperion-ng/config.json.tmp
+          mv addon-hyperion-ng/config.json.tmp addon-hyperion-ng/config.json
+          echo "Config updated:"
+          jq '.version' addon-hyperion-ng/config.json
+
       - name: Build Docker image
         if: github.event.inputs.test_mode != 'true'
         env:
