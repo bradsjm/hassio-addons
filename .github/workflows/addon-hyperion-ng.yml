@@ -32,10 +32,25 @@ jobs:
         id: version
         run: |
           chmod +x ./.github/scripts/update-hyperion-version.sh
+          
+          # Run script and capture output
           ./.github/scripts/update-hyperion-version.sh
-          echo "should_build=${{ env.VERSION != env.RELEASE }}" >> $GITHUB_OUTPUT
-          echo "version=${{ env.VERSION }}" >> $GITHUB_OUTPUT
-          echo "release=${{ env.RELEASE }}" >> $GITHUB_OUTPUT
+          
+          # Extract version and release from environment
+          CURRENT_VERSION=$(jq -r '.version' addon-hyperion-ng/config.json)
+          LATEST_RELEASE=$(curl -s --fail --connect-timeout 10 --max-time 30 "https://api.github.com/repos/hyperion-project/hyperion.ng/releases/latest" | jq -r '.tag_name // empty')
+          
+          echo "Current version: $CURRENT_VERSION"
+          echo "Latest release: $LATEST_RELEASE"
+          
+          # Set outputs
+          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "release=$LATEST_RELEASE" >> $GITHUB_OUTPUT
+          echo "should_build=$([ "$CURRENT_VERSION" != "$LATEST_RELEASE" ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          
+          # Also set environment variables for later steps
+          echo "VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+          echo "RELEASE=$LATEST_RELEASE" >> $GITHUB_ENV
 
   build:
     name: 'Build Add-on'
