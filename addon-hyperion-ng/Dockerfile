@@ -1,11 +1,11 @@
-ARG BUILD_FROM
+ARG BUILD_FROM=homeassistant/amd64-base-debian
 
 FROM ${BUILD_FROM}
 ARG DOWNLOAD_URL
 ARG BUILD_VERSION
 ARG BUILD_ARCH
 
-ENV LANG C.UTF-8
+ENV LANG=C.UTF-8
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		libqt5widgets5 \
 		libqt5serialport5 \

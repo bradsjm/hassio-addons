@@ -121,7 +121,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         
-      - name: Update version file
+      - name: Update config.json version
+        run: |
+          echo "Updating config.json from ${{ needs.validate.outputs.version }} to ${{ needs.validate.outputs.release }}"
+          jq ".version=\"${{ needs.validate.outputs.release }}\"" addon-hyperion-ng/config.json > addon-hyperion-ng/config.json.tmp
+          mv addon-hyperion-ng/config.json.tmp addon-hyperion-ng/config.json
+          echo "Updated config.json:"
+          jq '.version' addon-hyperion-ng/config.json
+        
+      - name: Commit version update
         uses: test-room-7/action-update-file@v1
         with:
           file-path: addon-hyperion-ng/config.json
