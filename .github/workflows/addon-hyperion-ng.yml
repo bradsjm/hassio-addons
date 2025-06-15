@@ -31,19 +31,14 @@ jobs:
       - name: Validate and get version info
         id: version
         run: |
-          chmod +x ./.github/scripts/update-hyperion-version.sh
-          
-          # Run script and capture output
-          ./.github/scripts/update-hyperion-version.sh
-          
-          # Extract version and release from environment
+          # Get current version BEFORE any updates
           CURRENT_VERSION=$(jq -r '.version' addon-hyperion-ng/config.json)
           LATEST_RELEASE=$(curl -s --fail --connect-timeout 10 --max-time 30 "https://api.github.com/repos/hyperion-project/hyperion.ng/releases/latest" | jq -r '.tag_name // empty')
           
           echo "Current version: $CURRENT_VERSION"
           echo "Latest release: $LATEST_RELEASE"
           
-          # Calculate should_build
+          # Calculate should_build BEFORE updating anything
           if [ "$CURRENT_VERSION" != "$LATEST_RELEASE" ]; then
             SHOULD_BUILD="true"
           else
@@ -52,14 +47,23 @@ jobs:
           
           echo "Should build: $SHOULD_BUILD (current: $CURRENT_VERSION, latest: $LATEST_RELEASE)"
           
-          # Set outputs
+          # Set outputs first
           echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "release=$LATEST_RELEASE" >> $GITHUB_OUTPUT
           echo "should_build=$SHOULD_BUILD" >> $GITHUB_OUTPUT
           
-          # Also set environment variables for later steps
+          # Set environment variables
           echo "VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
           echo "RELEASE=$LATEST_RELEASE" >> $GITHUB_ENV
+          
+          # Only run update script if we need to build (and we're not in test mode)
+          if [ "$SHOULD_BUILD" = "true" ] && [ "${{ github.event.inputs.test_mode }}" != "true" ]; then
+            echo "Running update script to prepare for build..."
+            chmod +x ./.github/scripts/update-hyperion-version.sh
+            ./.github/scripts/update-hyperion-version.sh
+          else
+            echo "Skipping config update (no build needed or in test mode)"
+          fi
 
   build:
     name: 'Build Add-on'
