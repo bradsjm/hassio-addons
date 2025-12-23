@@ -1,6 +1,6 @@
 {
   "name": "Hyperion.NG",
-  "version": "2.0.15",
+  "version": "2.1.1",
   "slug": "hyperionng",
   "description": "Hyperion is an opensource Bias or Ambient Lighting implementation by the Hyperion-Project. This add-on is not supported or endorsed by the Hyperion Project and may not work with hardware capture cards or LED devices due to limitations of containers",
   "url": "https://hyperion-project.org/",
