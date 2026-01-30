@@ -2,12 +2,6 @@ configuration:
     port:
         name: Port
         description: Port to listen on.
-    mdns:
-        name: mDNS
-        description: Enable mDNS discovery.
-    cors:
-        name: CORS
-        description: Comma-separated list of browser origins allowed.
     username:
         name: Username
         description: HTTP basic auth username.
