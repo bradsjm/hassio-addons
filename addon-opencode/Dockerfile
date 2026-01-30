@@ -4,14 +4,26 @@ FROM $BUILD_FROM
 
 # Execute during the build of the image
 ARG OPENCODE_VERSION
+ARG BUILD_ARCH
 RUN apk add --no-cache bash curl tar nodejs npm python3 py3-pip py3-uv
-RUN if [ -n "${OPENCODE_VERSION}" ]; then \
-        curl -fsSL https://opencode.ai/install | VERSION="${OPENCODE_VERSION}" bash; \
+
+RUN set -euo pipefail; \
+    case "${BUILD_ARCH}" in \
+      aarch64) target="linux-arm64-musl" ;; \
+      amd64) target="linux-x64-baseline-musl" ;; \
+      *) echo "Unsupported BUILD_ARCH: ${BUILD_ARCH}"; exit 1 ;; \
+    esac; \
+    if [ -n "${OPENCODE_VERSION}" ]; then \
+      version="${OPENCODE_VERSION#v}"; \
+      url="https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-${target}.tar.gz"; \
     else \
-        curl -fsSL https://opencode.ai/install | bash; \
-    fi
-RUN install -m 0755 /root/.opencode/bin/opencode /usr/bin/opencode \
-    && rm -rf /root/.opencode
+      url="https://github.com/anomalyco/opencode/releases/latest/download/opencode-${target}.tar.gz"; \
+    fi; \
+    mkdir -p /tmp/opencode; \
+    curl -fsSL -o /tmp/opencode/opencode.tar.gz "${url}"; \
+    tar -xzf /tmp/opencode/opencode.tar.gz -C /tmp/opencode; \
+    install -m 0755 /tmp/opencode/opencode /usr/bin/opencode; \
+    rm -rf /tmp/opencode
 
 # Copy root filesystem
 COPY rootfs /

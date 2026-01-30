@@ -20,3 +20,6 @@ configuration:
   password:
     name: Password
     description: HTTP basic auth password.
+  auto_update:
+    name: Auto update
+    description: Automatically update OpenCode on add-on start.

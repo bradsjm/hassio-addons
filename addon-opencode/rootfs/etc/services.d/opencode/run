@@ -13,6 +13,8 @@ declare mdns
 declare cors
 declare username
 declare password
+declare auto_update
+declare binary_path
 declare -a args
 
 mkdir -p /config/opencode
@@ -26,6 +28,53 @@ mdns=$(bashio::config 'mdns')
 cors=$(bashio::config 'cors')
 username=$(bashio::config 'username')
 password=$(bashio::config 'password')
+auto_update=$(bashio::config 'auto_update')
+
+binary_path="/usr/bin/opencode"
+
+if bashio::config.true 'auto_update'; then
+  bashio::log.info "Auto-update enabled, checking for OpenCode updates"
+
+  case "$(uname -m)" in
+    aarch64) target="linux-arm64-musl" ;;
+    x86_64) target="linux-x64-baseline-musl" ;;
+    *)
+      bashio::log.warning "Unsupported architecture for auto-update: $(uname -m)"
+      target=""
+      ;;
+  esac
+
+  current_version=$(${binary_path} --version 2>/dev/null | sed -n 's/[^0-9]*\([0-9][0-9.]*\).*/\1/p')
+  latest_version=$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 \
+    https://api.github.com/repos/anomalyco/opencode/releases/latest | \
+    sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p')
+
+  if [[ -n "${target}" && -n "${latest_version}" && "${latest_version}" != "${current_version}" ]]; then
+    bashio::log.info "Updating OpenCode from ${current_version:-unknown} to ${latest_version}"
+    tmp_dir=$(mktemp -d)
+    update_url="https://github.com/anomalyco/opencode/releases/download/v${latest_version}/opencode-${target}.tar.gz"
+
+    if curl -fsSL --retry 3 --retry-delay 2 --max-time 60 -o "${tmp_dir}/opencode.tar.gz" "${update_url}"; then
+      if tar -xzf "${tmp_dir}/opencode.tar.gz" -C "${tmp_dir}"; then
+        if [[ -f "${tmp_dir}/opencode" ]]; then
+          mkdir -p /config/opencode/bin
+          install -m 0755 "${tmp_dir}/opencode" /config/opencode/bin/opencode
+          binary_path="/config/opencode/bin/opencode"
+        else
+          bashio::log.warning "OpenCode update did not contain a binary"
+        fi
+      else
+        bashio::log.warning "OpenCode update archive could not be extracted"
+      fi
+    else
+      bashio::log.warning "OpenCode update download failed"
+    fi
+
+    rm -rf "${tmp_dir}"
+  elif [[ -f "/config/opencode/bin/opencode" ]]; then
+    binary_path="/config/opencode/bin/opencode"
+  fi
+fi
 
 if [[ -n "${username}" && "${username}" != "null" ]]; then
   export OPENCODE_SERVER_USERNAME="${username}"
@@ -52,7 +101,7 @@ if [[ -n "${cors}" && "${cors}" != "null" ]]; then
 fi
 bashio::log.info "Starting OpenCode (${mode}) on ${hostname}:${port}"
 
-/usr/bin/opencode "${args[@]}" &
+"${binary_path}" "${args[@]}" &
 opencode_pid=$!
 
 sleep 1

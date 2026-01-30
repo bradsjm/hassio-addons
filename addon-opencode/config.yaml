@@ -24,6 +24,7 @@ options:
     cors: ""
     username: "opencode"
     password: ""
+    auto_update: false
 schema:
     mode: list(web|serve)
     port: port
@@ -32,4 +33,5 @@ schema:
     cors: str?
     username: str?
     password: password?
+    auto_update: bool
 image: "bradsjm/{arch}-addon-opencode"
