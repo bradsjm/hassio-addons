@@ -52,4 +52,23 @@ if [[ -n "${cors}" && "${cors}" != "null" ]]; then
 fi
 bashio::log.info "Starting OpenCode (${mode}) on ${hostname}:${port}"
 
-exec /usr/bin/opencode "${args[@]}"
+/usr/bin/opencode "${args[@]}" &
+opencode_pid=$!
+
+sleep 1
+
+if ! kill -0 "${opencode_pid}" 2>/dev/null; then
+  daemon_pid=$(pidof opencode || true)
+  if [[ -z "${daemon_pid}" ]]; then
+    bashio::log.error "OpenCode exited early"
+    exit 1
+  fi
+
+  bashio::log.info "OpenCode daemonized, waiting"
+  while pidof opencode >/dev/null 2>&1; do
+    sleep 1
+  done
+  exit 0
+fi
+
+wait "${opencode_pid}"
