@@ -3,33 +3,33 @@ name: OpenCode
 version: "0.1.1"
 slug: opencode
 description: OpenCode web server for Home Assistant
-url: "https://github.com/bradsjm/hassio-addons/tree/master/addon-opencode"
+url: "https://opencode.ai/"
 arch:
-  - aarch64
-  - amd64
+    - aarch64
+    - amd64
 init: false
 map:
-  - config:rw
-  - share:rw
+    - config:rw
+    - share:rw
 ports:
-  4096/tcp: 4096
+    4096/tcp: 4096
 ports_description:
-  4096/tcp: OpenCode Web/API
+    4096/tcp: OpenCode Web/API
 webui: "http://[HOST]:[PORT:4096]"
 options:
-  mode: web
-  port: 4096
-  hostname: 0.0.0.0
-  mdns: false
-  cors: ""
-  username: "opencode"
-  password: ""
+    mode: web
+    port: 4096
+    hostname: 0.0.0.0
+    mdns: false
+    cors: ""
+    username: "opencode"
+    password: ""
 schema:
-  mode: list(web|serve)
-  port: port
-  hostname: str
-  mdns: bool
-  cors: str?
-  username: str?
-  password: password?
-image: "ghcr.io/bradsjm/{arch}-addon-opencode"
+    mode: list(web|serve)
+    port: port
+    hostname: str
+    mdns: bool
+    cors: str?
+    username: str?
+    password: password?
+image: "bradsjm/{arch}-addon-opencode"

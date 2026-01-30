@@ -28,9 +28,16 @@ jobs:
           sudo apt-get install -y curl
 
       - name: Build Docker image
+        if: github.event.inputs.test_mode != 'true'
         env:
           DOCKER_USER: ${{ secrets.DOCKERHUB_USER }}
           DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+        run: |
+          chmod +x ./.github/scripts/build-opencode.sh
+          ./.github/scripts/build-opencode.sh ${{ matrix.arch }}
+
+      - name: Build Docker image (test mode)
+        if: github.event.inputs.test_mode == 'true'
         run: |
           chmod +x ./.github/scripts/build-opencode.sh
           ./.github/scripts/build-opencode.sh ${{ matrix.arch }}
