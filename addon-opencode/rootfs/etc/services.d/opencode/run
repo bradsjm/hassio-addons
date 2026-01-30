@@ -14,8 +14,7 @@ declare binary_path
 declare -a args
 
 mkdir -p /config/opencode
-export HOME=/config/opencode
-export XDG_CONFIG_HOME=/config/opencode
+export OPENCODE_CONFIG_DIR=/config/opencode
 
 port=$(bashio::config 'port')
 username=$(bashio::config 'username')
@@ -49,9 +48,7 @@ if bashio::config.true 'auto_update'; then
     if curl -fsSL --retry 3 --retry-delay 2 --max-time 60 -o "${tmp_dir}/opencode.tar.gz" "${update_url}"; then
       if tar -xzf "${tmp_dir}/opencode.tar.gz" -C "${tmp_dir}"; then
         if [[ -f "${tmp_dir}/opencode" ]]; then
-          mkdir -p /config/opencode/bin
-          install -m 0755 "${tmp_dir}/opencode" /config/opencode/bin/opencode
-          binary_path="/config/opencode/bin/opencode"
+          install -m 0755 "${tmp_dir}/opencode" /usr/bin/opencode
         else
           bashio::log.warning "OpenCode update did not contain a binary"
         fi
@@ -63,8 +60,6 @@ if bashio::config.true 'auto_update'; then
     fi
 
     rm -rf "${tmp_dir}"
-  elif [[ -f "/config/opencode/bin/opencode" ]]; then
-    binary_path="/config/opencode/bin/opencode"
   fi
 fi
 
