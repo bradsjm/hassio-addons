@@ -1,0 +1,22 @@
+configuration:
+  mode:
+    name: Mode
+    description: Run the OpenCode web UI or headless server.
+  port:
+    name: Port
+    description: Port to listen on.
+  hostname:
+    name: Hostname
+    description: Address to bind to.
+  mdns:
+    name: mDNS
+    description: Enable mDNS discovery.
+  cors:
+    name: CORS
+    description: Comma-separated list of browser origins allowed.
+  username:
+    name: Username
+    description: HTTP basic auth username.
+  password:
+    name: Password
+    description: HTTP basic auth password.

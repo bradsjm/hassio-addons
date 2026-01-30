@@ -3,6 +3,9 @@
 ## addon-hyperion-ng
   - Hyperion is an opensource Bias or Ambient Lighting implementation
 
+## addon-opencode
+  - OpenCode web server add-on
+
 ***
 
 ## Installation instructions:

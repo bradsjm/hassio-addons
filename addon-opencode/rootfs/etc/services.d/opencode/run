@@ -1,0 +1,55 @@
+#!/usr/bin/with-contenv bashio
+# ==============================================================================
+# Start the OpenCode service
+# s6-overlay docs: https://github.com/just-containers/s6-overlay
+# ==============================================================================
+
+set -e
+
+declare mode
+declare port
+declare hostname
+declare mdns
+declare cors
+declare username
+declare password
+declare -a args
+
+mkdir -p /config/opencode
+export HOME=/config/opencode
+export XDG_CONFIG_HOME=/config/opencode
+
+mode=$(bashio::config 'mode')
+port=$(bashio::config 'port')
+hostname=$(bashio::config 'hostname')
+mdns=$(bashio::config 'mdns')
+cors=$(bashio::config 'cors')
+username=$(bashio::config 'username')
+password=$(bashio::config 'password')
+
+if [[ -n "${username}" && "${username}" != "null" ]]; then
+  export OPENCODE_SERVER_USERNAME="${username}"
+fi
+
+if [[ -n "${password}" && "${password}" != "null" ]]; then
+  export OPENCODE_SERVER_PASSWORD="${password}"
+fi
+
+args=("${mode}" "--port" "${port}" "--hostname" "${hostname}")
+
+if bashio::config.true 'mdns'; then
+  args+=("--mdns")
+fi
+
+if [[ -n "${cors}" && "${cors}" != "null" ]]; then
+  IFS="," read -r -a cors_list <<< "${cors}"
+  for origin in "${cors_list[@]}"; do
+    origin=$(echo "${origin}" | xargs)
+    if [[ -n "${origin}" ]]; then
+      args+=("--cors" "${origin}")
+    fi
+  done
+fi
+bashio::log.info "Starting OpenCode (${mode}) on ${hostname}:${port}"
+
+exec /usr/bin/opencode "${args[@]}"
