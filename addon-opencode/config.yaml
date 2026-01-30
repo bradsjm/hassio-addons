@@ -4,6 +4,13 @@ version: "0.1.1"
 slug: opencode
 description: OpenCode web server for Home Assistant
 url: "https://opencode.ai/"
+apparmor: false
+startup: application
+host_network: true
+hassio_api: true
+homeassistant_api: true
+hassio_role: admin
+stage: experimental
 arch:
     - aarch64
     - amd64
