@@ -5,7 +5,14 @@ FROM $BUILD_FROM
 # Execute during the build of the image
 ARG OPENCODE_VERSION
 ARG BUILD_ARCH
-RUN apk add --no-cache bash curl tar nodejs npm python3 py3-pip py3-uv libc6-compat gcompat
+ARG GLIBC_VERSION=2.39-r0
+RUN apk add --no-cache bash ca-certificates curl tar nodejs npm python3 py3-pip py3-uv libc6-compat gcompat
+
+RUN set -euo pipefail; \
+    curl -fsSL -o /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub; \
+    curl -fsSL -o /tmp/glibc.apk "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk"; \
+    apk add --no-cache /tmp/glibc.apk; \
+    rm -f /tmp/glibc.apk
 
 RUN set -euo pipefail; \
     case "${BUILD_ARCH}" in \
