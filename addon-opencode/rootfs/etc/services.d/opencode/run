@@ -76,7 +76,7 @@ fi
 args=("web" "--port" "${port}" "--hostname" "0.0.0.0")
 
 bashio::log.info "Adding Home Assistant MCP server to OpenCode"
-"${binary_path} mcp add home-assistant uvx ha-mcp@latest"
+"${binary_path}" "mcp add home-assistant uvx ha-mcp@latest"
 
 bashio::log.info "Starting OpenCode ${args[@]}"
 "${binary_path}" "${args[@]}"
