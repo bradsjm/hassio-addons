@@ -17,18 +17,14 @@ ports_description:
     4096/tcp: OpenCode Web/API
 webui: "http://[HOST]:[PORT:4096]"
 options:
-    mode: web
     port: 4096
-    hostname: 0.0.0.0
     mdns: false
     cors: ""
     username: "opencode"
     password: ""
     auto_update: false
 schema:
-    mode: list(web|serve)
     port: port
-    hostname: str
     mdns: bool
     cors: str?
     username: str?

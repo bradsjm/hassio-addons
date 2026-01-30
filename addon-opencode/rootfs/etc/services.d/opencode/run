@@ -6,7 +6,6 @@
 
 set -e
 
-declare mode
 declare port
 declare hostname
 declare mdns
@@ -21,9 +20,7 @@ mkdir -p /config/opencode
 export HOME=/config/opencode
 export XDG_CONFIG_HOME=/config/opencode
 
-mode=$(bashio::config 'mode')
 port=$(bashio::config 'port')
-hostname=$(bashio::config 'hostname')
 mdns=$(bashio::config 'mdns')
 cors=$(bashio::config 'cors')
 username=$(bashio::config 'username')
@@ -84,7 +81,7 @@ if [[ -n "${password}" && "${password}" != "null" ]]; then
   export OPENCODE_SERVER_PASSWORD="${password}"
 fi
 
-args=("${mode}" "--port" "${port}" "--hostname" "${hostname}")
+args=("web" "--port" "${port}" "--hostname" "0.0.0.0")
 
 if bashio::config.true 'mdns'; then
   args+=("--mdns")
@@ -99,25 +96,6 @@ if [[ -n "${cors}" && "${cors}" != "null" ]]; then
     fi
   done
 fi
-bashio::log.info "Starting OpenCode (${mode}) on ${hostname}:${port}"
+bashio::log.info "Starting OpenCode ${args[@]}"
 
-"${binary_path}" "${args[@]}" &
-opencode_pid=$!
-
-sleep 1
-
-if ! kill -0 "${opencode_pid}" 2>/dev/null; then
-  daemon_pid=$(pidof opencode || true)
-  if [[ -z "${daemon_pid}" ]]; then
-    bashio::log.error "OpenCode exited early"
-    exit 1
-  fi
-
-  bashio::log.info "OpenCode daemonized, waiting"
-  while pidof opencode >/dev/null 2>&1; do
-    sleep 1
-  done
-  exit 0
-fi
-
-wait "${opencode_pid}"
+"${binary_path}" "${args[@]}"
