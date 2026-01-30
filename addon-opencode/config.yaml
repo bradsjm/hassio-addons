@@ -1,10 +1,9 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: OpenCode
-version: "0.1.2"
+version: "0.1.3"
 slug: opencode
 description: OpenCode web server for Home Assistant
 url: "https://opencode.ai/"
-apparmor: false
 startup: application
 host_network: true
 hassio_api: true
@@ -23,17 +22,16 @@ ports:
 ports_description:
     4096/tcp: OpenCode Web/API
 webui: "http://[HOST]:[PORT:4096]"
+ingress: true
+ingress_port: 4096
+panel_icon: mdi:alpha-o-box-outline
 options:
     port: 4096
-    mdns: false
-    cors: ""
     username: "opencode"
     password: ""
     auto_update: false
 schema:
     port: port
-    mdns: bool
-    cors: str?
     username: str?
     password: password?
     auto_update: bool

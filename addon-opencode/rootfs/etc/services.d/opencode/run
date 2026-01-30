@@ -7,9 +7,6 @@
 set -e
 
 declare port
-declare hostname
-declare mdns
-declare cors
 declare username
 declare password
 declare auto_update
@@ -21,8 +18,6 @@ export HOME=/config/opencode
 export XDG_CONFIG_HOME=/config/opencode
 
 port=$(bashio::config 'port')
-mdns=$(bashio::config 'mdns')
-cors=$(bashio::config 'cors')
 username=$(bashio::config 'username')
 password=$(bashio::config 'password')
 auto_update=$(bashio::config 'auto_update')
@@ -83,19 +78,6 @@ fi
 
 args=("web" "--port" "${port}" "--hostname" "0.0.0.0")
 
-if bashio::config.true 'mdns'; then
-  args+=("--mdns")
-fi
-
-if [[ -n "${cors}" && "${cors}" != "null" ]]; then
-  IFS="," read -r -a cors_list <<< "${cors}"
-  for origin in "${cors_list[@]}"; do
-    origin=$(echo "${origin}" | xargs)
-    if [[ -n "${origin}" ]]; then
-      args+=("--cors" "${origin}")
-    fi
-  done
-fi
 bashio::log.info "Starting OpenCode ${args[@]}"
 
 "${binary_path}" "${args[@]}"
