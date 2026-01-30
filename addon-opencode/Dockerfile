@@ -5,7 +5,7 @@ FROM $BUILD_FROM
 # Execute during the build of the image
 ARG OPENCODE_VERSION
 ARG BUILD_ARCH
-RUN apk add --no-cache bash curl tar nodejs npm python3 py3-pip py3-uv
+RUN apk add --no-cache bash curl tar nodejs npm python3 py3-pip py3-uv libc6-compat
 
 RUN set -euo pipefail; \
     case "${BUILD_ARCH}" in \
