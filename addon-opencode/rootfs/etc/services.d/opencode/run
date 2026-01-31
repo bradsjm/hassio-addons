@@ -65,6 +65,25 @@ if bashio::config.true 'auto_update'; then
   fi
 fi
 
+# Install user configured/requested packages
+if bashio::config.has_value 'packages'; then
+    apt update \
+        || bashio::exit.nok 'Failed updating Ubuntu packages repository indexes'
+
+    for package in $(bashio::config 'packages'); do
+        apt-get install -y "$package" \
+            || bashio::exit.nok "Failed installing package ${package}"
+    done
+fi
+
+# Executes user configured/requested commands on startup
+if bashio::config.has_value 'init_commands'; then
+    while read -r cmd; do
+        eval "${cmd}" \
+            || bashio::exit.nok "Failed executing init command: ${cmd}"
+    done <<< "$(bashio::config 'init_commands')"
+fi
+
 if [[ -n "${username}" && "${username}" != "null" ]]; then
   export OPENCODE_SERVER_USERNAME="${username}"
 fi

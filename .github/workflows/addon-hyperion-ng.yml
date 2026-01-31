@@ -109,8 +109,8 @@ jobs:
                   DOCKER_USER: ${{ secrets.DOCKERHUB_USER }}
                   DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
               run: |
-                  chmod +x ./.github/scripts/build.sh
-                  ./.github/scripts/build.sh ${{ matrix.arch }}
+                  chmod +x ./.github/scripts/build-hyperion.sh
+                  ./.github/scripts/build-hyperion.sh ${{ matrix.arch }}
 
     release:
         name: "Update Release"

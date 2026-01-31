@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: OpenCode Web Server
-version: "0.32"
+version: "0.33"
 slug: opencode
 description: OpenCode web server for Home Assistant
 url: "https://opencode.ai/"
@@ -9,12 +9,16 @@ host_network: true
 apparmor: false
 hassio_api: true
 homeassistant_api: true
-hassio_role: admin
+hassio_role: manager
 stage: experimental
 arch:
     - aarch64
     - amd64
 init: false
+ingress: true
+ingress_port: 4096
+ingress_stream: true
+panel_icon: mdi:alpha-o-box
 map:
     - config:rw
     - share:rw
@@ -28,9 +32,15 @@ options:
     username: "opencode"
     password: ""
     auto_update: false
+    packages: []
+    init_commands: []
 schema:
     port: port
     username: str?
     password: password?
     auto_update: bool
+    packages:
+        - str
+    init_commands:
+        - str
 image: "bradsjm/{arch}-addon-opencode"
