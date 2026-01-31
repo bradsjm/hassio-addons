@@ -17,6 +17,7 @@ mkdir -p /config/opencode
 export OPENCODE_CONFIG_DIR=/config/opencode
 export HOMEASSISTANT_URL=http://supervisor/core
 export HOMEASSISTANT_TOKEN=${SUPERVISOR_TOKEN}
+export XDG_DATA_HOME=/data
 
 port=$(bashio::config 'port')
 username=$(bashio::config 'username')

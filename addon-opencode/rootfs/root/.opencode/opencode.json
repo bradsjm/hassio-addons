@@ -5,6 +5,19 @@
             "type": "local",
             "command": ["uvx", "ha-mcp@latest"],
             "enabled": true
+        },
+        "ha-community-forum": {
+            "type": "local",
+            "command": [
+                "npx",
+                "-y",
+                "@discourse/mcp@latest",
+                "--site",
+                "https://community.home-assistant.io",
+                "--tools_mode",
+                "discourse_api_only"
+            ],
+            "enabled": true
         }
     }
 }
