@@ -1,23 +1,29 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
-ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base
+ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base-debian:latest
 FROM $BUILD_FROM
 
 # Execute during the build of the image
 ARG OPENCODE_VERSION
 ARG BUILD_ARCH
-ARG GLIBC_VERSION=2.39-r0
-RUN apk add --no-cache bash ca-certificates curl tar nodejs npm python3 py3-pip py3-uv libc6-compat gcompat
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+      bash \
+      ca-certificates \
+      curl \
+      tar \
+      nodejs \
+      npm \
+      python3 \
+      python3-pip \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN set -euo pipefail; \
-    curl -fsSL -o /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub; \
-    curl -fsSL -o /tmp/glibc.apk "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk"; \
-    apk add --no-cache /tmp/glibc.apk; \
-    rm -f /tmp/glibc.apk
+RUN curl -fsSL https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:${PATH}"
 
 RUN set -euo pipefail; \
     case "${BUILD_ARCH}" in \
-      aarch64) target="linux-arm64-musl" ;; \
-      amd64) target="linux-x64-baseline-musl" ;; \
+      aarch64) target="linux-arm64" ;; \
+      amd64) target="linux-x64-baseline" ;; \
       *) echo "Unsupported BUILD_ARCH: ${BUILD_ARCH}"; exit 1 ;; \
     esac; \
     if [ -n "${OPENCODE_VERSION}" ]; then \
