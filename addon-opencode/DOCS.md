@@ -4,18 +4,9 @@ OpenCode is an AI-powered coding assistant that helps you write, understand, and
 
 This add-on runs the OpenCode web server or headless API server directly inside Home Assistant, providing local access to OpenCode's capabilities from within your home network.
 
-## Installation
+## Home Assistant Integration
 
-The Home Assistant Add-ons repository is available via the official Home Assistant Supervisor. To install this add-on:
-
-1. In the Home Assistant sidebar, click **Settings** → **Add-ons** → **Add-on store**.
-2. Click the **⋮** (three dots) in the top-right corner and select **Add repository**.
-3. Enter `https://github.com/bradsjm/hassio-addons` and click **Add**.
-4. Find the "OpenCode" add-on in the repository list and click it.
-5. Click **Install**.
-6. After installation, start the add-on from the **Info** tab.
-
-The add-on will be available at `http://<home-assistant-host>:4096` (or your configured port).
+This add-on automatically installs [ha-mcp](https://github.com/homeassistant-ai/ha-mcp), enabling OpenCode to communicate with your Home Assistant instance locally. This integration allows OpenCode to interact with your Home Assistant entities, automations, and other Home Assistant features without requiring external API access.
 
 ## App configuration
 

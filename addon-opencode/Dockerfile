@@ -5,9 +5,10 @@ FROM $BUILD_FROM
 # Execute during the build of the image
 ARG OPENCODE_VERSION
 ARG BUILD_ARCH
-RUN apt-get update \
-    && apt-get upgrade \
-    && apt-get install -y --no-install-recommends \
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update \
+    && apt-get upgrade -q -y \
+    && apt-get install -q -y --no-install-recommends \
     bash \
     ca-certificates \
     curl \
