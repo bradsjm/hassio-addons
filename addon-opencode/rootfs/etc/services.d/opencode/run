@@ -73,7 +73,7 @@ if [[ -n "${password}" && "${password}" != "null" ]]; then
   export OPENCODE_SERVER_PASSWORD="${password}"
 fi
 
-args=("web" "--port" "${port}" "--hostname" "0.0.0.0")
+args=("web" "--port" "${port}" "--mdns" "--hostname" "0.0.0.0")
 
 bashio::log.info "Starting OpenCode ${args[@]}"
 "${binary_path}" "${args[@]}"

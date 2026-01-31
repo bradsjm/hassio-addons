@@ -6,15 +6,19 @@ FROM $BUILD_FROM
 ARG OPENCODE_VERSION
 ARG BUILD_ARCH
 RUN apt-get update \
+    && apt-get upgrade \
     && apt-get install -y --no-install-recommends \
-      bash \
-      ca-certificates \
-      curl \
-      tar \
-      nodejs \
-      npm \
-      python3 \
-      python3-pip \
+    bash \
+    ca-certificates \
+    curl \
+    jq \
+    ripgrep \
+    nodejs \
+    npm \
+    python3 \
+    python3-pip \
+    tar \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL https://astral.sh/uv/install.sh | sh
