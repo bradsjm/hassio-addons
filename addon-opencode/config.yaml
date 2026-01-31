@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: OpenCode Web Server
-version: "0.31"
+version: "0.32"
 slug: opencode
 description: OpenCode web server for Home Assistant
 url: "https://opencode.ai/"
