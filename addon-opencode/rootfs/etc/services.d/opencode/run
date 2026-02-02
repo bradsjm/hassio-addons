@@ -95,5 +95,6 @@ fi
 
 args=("web" "--port" "${port}" "--hostname" "0.0.0.0")
 
+cd /config
 bashio::log.info "Starting OpenCode ${args[@]}"
 "${binary_path}" "${args[@]}"
