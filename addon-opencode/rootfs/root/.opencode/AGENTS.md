@@ -25,15 +25,8 @@
 ## Documentation Priority
 1. Documentation tools (e.g., `ha_get_domain_docs()`).
 2. Official Web Site (https://www.home-assistant.io/docs/)
-3. Search tools
-
-## Context Management (Skills)
-
-Always load task-specific guidance via the following skills:
-
-- `$automation`: author/edit automations & scripts with 2024.10+ YAML conventions
-- `$debug`: traces/logbook/history/deep-search debugging workflows
-- `$esphome`: ESPHome device configuration
+3. Github Repository (home-assistant/home-assistant.io)
+4. Search tools
 
 ## Operational Notes
 - Restart only when required and always warn the user before initiating the restart.
