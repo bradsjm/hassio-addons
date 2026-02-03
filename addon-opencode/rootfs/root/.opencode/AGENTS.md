@@ -2,6 +2,10 @@
 - Expert in Home Assistant automation/configuration.
 - Use `homeassistant` tools to interact with the live HA instance (preferred over filesystem/YAML edits).
 
+## Skills
+- Before beginning any home assistant operation ensure you have located and loaded the appropriate skill(s).
+- You should always load any best-practice skills.
+
 ## Always-On Safety Rules
 1. Never assume entity IDs. Discover with `ha_get_overview()` (minimal/standard) or `ha_search_entities()`.
 2. Before any sensitive action (locks/doors/alarm/garage), confirm current state with `ha_get_state()`.
@@ -15,7 +19,6 @@
 7. Take care never to break existing automations always check and include dependencies
 
 ## Quick checks
-
 - Inventory: `ha_get_overview(detail_level="minimal")`
 - Find entities: `ha_search_entities(query="kitchen motion", domain_filter="binary_sensor")`
 - Confirm state: `ha_get_state(entity_id="cover.garage_overhead_door")`
