@@ -85,8 +85,9 @@ if bashio::config.has_value 'init_commands'; then
     done <<< "$(bashio::config 'init_commands')"
 fi
 
-# Install HA-MCP skills into global context
+# Install skills into global context
 npx skills add homeassistant-ai/skills -g -a opencode -y
+npx skills add https://github.com/bradsjm/hassio-addons/addon-opencode/skills -g -a opencode -y
 
 if [[ -n "${username}" && "${username}" != "null" ]]; then
   export OPENCODE_SERVER_USERNAME="${username}"
