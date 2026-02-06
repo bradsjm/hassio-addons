@@ -99,6 +99,9 @@ fi
 
 args=("web" "--port" "${port}" "--hostname" "0.0.0.0")
 
+# Refresh available models
+"${binary_path}" models --refresh
+
 cd /config
 bashio::log.info "Starting OpenCode ${args[@]}"
 "${binary_path}" "${args[@]}"
