@@ -108,11 +108,7 @@ binary_path="/data/.opencode/bin/opencode"
 if [[ -n "${opencode_version}" ]]; then
   bashio::log.info "Installing pinned OpenCode version ${opencode_version}"
   if ! install_opencode "${opencode_version}"; then
-    if [[ -x "${binary_path}" ]]; then
-      bashio::log.warning 'Pinned version install failed, continuing with existing binary'
-    else
-      bashio::exit.nok "Failed to install pinned OpenCode version ${opencode_version}"
-    fi
+    bashio::exit.nok "Failed to install pinned OpenCode version ${opencode_version}"
   fi
 else
   bashio::log.info "Installing latest OpenCode release"
