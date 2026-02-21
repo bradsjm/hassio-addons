@@ -47,6 +47,19 @@ After starting the add-on:
 1. Open your web browser and navigate to `http://<home-assistant-host>:4096` (replace `<home-assistant-host>` with your Home Assistant IP address or hostname).
 2. If authentication is configured, enter the username and password you set in the add-on configuration.
 3. You can now interact with OpenCode through the web interface.
+4. See [Opencode Web Documentation](https://opencode.ai/docs/web/) for more details.
+
+## Attaching a Terminal
+
+You can attach a terminal TUI to a running web server:
+
+```bash
+# Install OpenCode
+curl -fsSL https://opencode.ai/install | bash
+
+# Connect to Home Assistant instance
+opencode attach http://homeassistant.local:4096
+```
 
 ## Support
 

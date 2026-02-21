@@ -11,6 +11,12 @@ configuration:
     opencode_version:
         name: OpenCode version pin
         description: Pin OpenCode to a specific version (for example 0.6.0). Leave empty to install latest on startup.
+    packages:
+        name: Debian Packages to Install
+        description: Additional Debian packages to be installed and made available to OpenCode.
+    init_commands:
+        name: Initialization Commands to run
+        decription: Terminal commands to run before OpenCode is started
     opencode_env_vars:
         name: OpenCode environment variables
         description: Additional OPENCODE_ variables to export before startup, entered as KEY=value strings (for example OPENCODE_DISABLE_LSP_DOWNLOAD=true).
