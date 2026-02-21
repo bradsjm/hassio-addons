@@ -26,9 +26,19 @@ The username for HTTP basic authentication. The default is `opencode`. Authentic
 
 The password for HTTP basic authentication. Leave empty to disable authentication (not recommended for exposed networks). When set, both the web UI and API require this username and password for access.
 
-### Auto update
+### OpenCode version pin
 
-When enabled, the add-on checks for a new OpenCode release on startup and installs it to `/config/opencode/bin/opencode`. If an update fails, the add-on continues using the bundled binary.
+Set this to a specific OpenCode version (for example `0.6.0`) to pin the add-on to that release. Leave it empty to install the latest OpenCode release on every startup.
+
+OpenCode configuration files are stored in `/config/opencode`. The OpenCode binary and runtime data are stored under `/data`.
+
+### OpenCode environment variables
+
+Use this option to set additional `OPENCODE_` environment variables before OpenCode starts.
+
+Enter each item as `KEY=value` (for example `OPENCODE_DISABLE_LSP_DOWNLOAD=true` or `OPENCODE_MODELS_URL=https://example.com/models.json`).
+
+Only variables prefixed with `OPENCODE_` are accepted.
 
 ## Accessing the Web Interface
 

@@ -8,6 +8,9 @@ configuration:
     password:
         name: Password
         description: HTTP basic auth password.
-    auto_update:
-        name: Auto update
-        description: Automatically update OpenCode on add-on start.
+    opencode_version:
+        name: OpenCode version pin
+        description: Pin OpenCode to a specific version (for example 0.6.0). Leave empty to install latest on startup.
+    opencode_env_vars:
+        name: OpenCode environment variables
+        description: Additional OPENCODE_ variables to export before startup, entered as KEY=value strings (for example OPENCODE_DISABLE_LSP_DOWNLOAD=true).

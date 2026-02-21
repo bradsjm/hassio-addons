@@ -7,5 +7,3 @@ labels:
     org.opencontainers.image.description: "OpenCode web server add-on."
     org.opencontainers.image.source: "https://github.com/bradsjm/hassio-addons"
     org.opencontainers.image.licenses: "Apache License 2.0"
-args:
-    OPENCODE_VERSION: ""

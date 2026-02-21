@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: OpenCode Server
-version: "0.6"
+version: "0.7"
 slug: opencode
 description: OpenCode web server configured for Home Assistant
 url: "https://opencode.ai/"
@@ -31,14 +31,17 @@ options:
     port: 4096
     username: "opencode"
     password: ""
-    auto_update: false
+    opencode_version: ""
+    opencode_env_vars: []
     packages: []
     init_commands: []
 schema:
     port: port
     username: str?
     password: password?
-    auto_update: bool
+    opencode_version: str?
+    opencode_env_vars:
+        - str
     packages:
         - str
     init_commands:

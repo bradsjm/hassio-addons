@@ -9,62 +9,123 @@ set -e
 declare port
 declare username
 declare password
-declare auto_update
+declare opencode_version
+declare env_entry
 declare binary_path
 declare -a args
 
-mkdir -p /config/opencode
+log_binary_diagnostics() {
+  local ls_output
+  local ldd_output
+
+  bashio::log.error "OpenCode execution diagnostics"
+  bashio::log.error "Architecture: $(uname -m)"
+
+  if [[ -e "${binary_path}" ]]; then
+    ls_output=$(ls -l "${binary_path}" 2>&1 || true)
+    bashio::log.error "Binary details: ${ls_output}"
+    ldd_output=$(ldd "${binary_path}" 2>&1 || true)
+    while IFS= read -r line; do
+      bashio::log.error "ldd: ${line}"
+    done <<< "${ldd_output}"
+  else
+    bashio::log.error "Binary path not found: ${binary_path}"
+  fi
+}
+
+install_opencode() {
+  local requested_version=${1:-}
+  local installer_script
+
+  installer_script=$(mktemp)
+
+  if ! curl -fsSL --retry 3 --retry-delay 2 --max-time 60 -o "${installer_script}" https://opencode.ai/install; then
+    rm -f "${installer_script}"
+    return 1
+  fi
+
+  if [[ -n "${requested_version}" ]]; then
+    if ! HOME=/data bash "${installer_script}" --no-modify-path --version "${requested_version}"; then
+      rm -f "${installer_script}"
+      return 1
+    fi
+  else
+    if ! HOME=/data bash "${installer_script}" --no-modify-path; then
+      rm -f "${installer_script}"
+      return 1
+    fi
+  fi
+
+  rm -f "${installer_script}"
+}
+
+mkdir -p /config/opencode /data /data/npm-cache
 export OPENCODE_CONFIG_DIR=/config/opencode
+export OPENCODE_CONFIG=/config/opencode/opencode.json
 export HOMEASSISTANT_URL=http://supervisor/core
 export HOMEASSISTANT_TOKEN=${SUPERVISOR_TOKEN}
 export XDG_DATA_HOME=/data
+export OPENCODE_DISABLE_AUTOUPDATE=true
+export NPM_CONFIG_CACHE=/data/npm-cache
 
 port=$(bashio::config 'port')
 username=$(bashio::config 'username')
 password=$(bashio::config 'password')
-auto_update=$(bashio::config 'auto_update')
+opencode_version=$(bashio::config 'opencode_version')
 
-binary_path="/usr/bin/opencode"
+if [[ "${opencode_version}" == "null" ]]; then
+  opencode_version=""
+fi
 
-if bashio::config.true 'auto_update'; then
-  bashio::log.info "Auto-update enabled, checking for OpenCode updates"
+opencode_version=${opencode_version#v}
 
-  case "$(uname -m)" in
-    aarch64) target="linux-arm64-musl" ;;
-    x86_64) target="linux-x64-baseline-musl" ;;
-    *)
-      bashio::log.warning "Unsupported architecture for auto-update: $(uname -m)"
-      target=""
-      ;;
-  esac
-
-  current_version=$(${binary_path} --version 2>/dev/null | sed -n 's/[^0-9]*\([0-9][0-9.]*\).*/\1/p')
-  latest_version=$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 \
-    https://api.github.com/repos/anomalyco/opencode/releases/latest | \
-    sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p')
-
-  if [[ -n "${target}" && -n "${latest_version}" && "${latest_version}" != "${current_version}" ]]; then
-    bashio::log.info "Updating OpenCode from ${current_version:-unknown} to ${latest_version}"
-    tmp_dir=$(mktemp -d)
-    update_url="https://github.com/anomalyco/opencode/releases/download/v${latest_version}/opencode-${target}.tar.gz"
-
-    if curl -fsSL --retry 3 --retry-delay 2 --max-time 60 -o "${tmp_dir}/opencode.tar.gz" "${update_url}"; then
-      if tar -xzf "${tmp_dir}/opencode.tar.gz" -C "${tmp_dir}"; then
-        if [[ -f "${tmp_dir}/opencode" ]]; then
-          install -m 0755 "${tmp_dir}/opencode" /usr/bin/opencode
-        else
-          bashio::log.warning "OpenCode update did not contain a binary"
-        fi
-      else
-        bashio::log.warning "OpenCode update archive could not be extracted"
-      fi
-    else
-      bashio::log.warning "OpenCode update download failed"
+if bashio::config.has_value 'opencode_env_vars'; then
+  while IFS= read -r env_entry; do
+    if [[ -z "${env_entry}" ]]; then
+      continue
     fi
 
-    rm -rf "${tmp_dir}"
+    if [[ ! "${env_entry}" =~ ^OPENCODE_[A-Z0-9_]+=.*$ ]]; then
+      bashio::log.warning "Skipping invalid OpenCode environment entry: ${env_entry}"
+      continue
+    fi
+
+    export "${env_entry}"
+    bashio::log.info "Applied OpenCode environment override: ${env_entry%%=*}"
+  done <<< "$(bashio::config 'opencode_env_vars')"
+fi
+
+if [[ ! -f /config/opencode/opencode.json ]] && [[ -f /root/.opencode/opencode.json ]]; then
+  cp /root/.opencode/opencode.json /config/opencode/opencode.json
+fi
+
+if [[ ! -f /config/opencode/AGENTS.md ]] && [[ -f /root/.opencode/AGENTS.md ]]; then
+  cp /root/.opencode/AGENTS.md /config/opencode/AGENTS.md
+fi
+
+binary_path="/data/.opencode/bin/opencode"
+
+if [[ -n "${opencode_version}" ]]; then
+  bashio::log.info "Installing pinned OpenCode version ${opencode_version}"
+  if ! install_opencode "${opencode_version}"; then
+    if [[ -x "${binary_path}" ]]; then
+      bashio::log.warning 'Pinned version install failed, continuing with existing binary'
+    else
+      bashio::exit.nok "Failed to install pinned OpenCode version ${opencode_version}"
+    fi
+  fi
+else
+  bashio::log.info "Installing latest OpenCode release"
+  if ! install_opencode; then
+    if [[ -x "${binary_path}" ]]; then
+      bashio::log.warning 'Latest install failed, continuing with existing binary'
+    else
+      bashio::exit.nok 'Failed to install latest OpenCode release'
+    fi
   fi
 fi
+
+export HOME=/config/opencode
 
 # Install user configured/requested packages
 if bashio::config.has_value 'packages'; then
@@ -85,6 +146,16 @@ if bashio::config.has_value 'init_commands'; then
     done <<< "$(bashio::config 'init_commands')"
 fi
 
+if [[ ! -x "${binary_path}" ]]; then
+  log_binary_diagnostics
+  bashio::exit.nok 'OpenCode binary is missing after install attempt'
+fi
+
+if ! "${binary_path}" --version >/dev/null 2>&1; then
+  log_binary_diagnostics
+  bashio::exit.nok 'OpenCode binary failed to execute'
+fi
+
 # Install skills into global context
 npx skills add homeassistant-ai/skills -g -a opencode -y
 npx skills add https://github.com/bradsjm/hassio-addons/addon-opencode/skills -g -a opencode -y
@@ -100,7 +171,9 @@ fi
 args=("web" "--port" "${port}" "--hostname" "0.0.0.0")
 
 # Refresh available models
-"${binary_path}" models --refresh
+if ! "${binary_path}" models --refresh; then
+  bashio::log.warning 'Failed to refresh models, continuing startup'
+fi
 
 cd /config
 bashio::log.info "Starting OpenCode ${args[@]}"
