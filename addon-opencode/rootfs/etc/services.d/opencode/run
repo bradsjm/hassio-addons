@@ -12,6 +12,16 @@ declare password
 declare opencode_version
 declare env_entry
 declare binary_path
+declare config_dir
+declare state_dir
+declare runtime_home
+declare runtime_cache
+declare runtime_xdg_config
+declare runtime_xdg_data
+declare runtime_npm_cache
+declare runtime_npm_prefix
+declare runtime_bun_install
+declare runtime_bun_cache
 declare -a args
 
 log_binary_diagnostics() {
@@ -59,14 +69,34 @@ install_opencode() {
   rm -f "${installer_script}"
 }
 
-mkdir -p /config/opencode /data /data/npm-cache
-export OPENCODE_CONFIG_DIR=/config/opencode
-export OPENCODE_CONFIG=/config/opencode/opencode.json
+config_dir=/config/opencode
+state_dir=/data/opencode
+runtime_home=${state_dir}/home
+runtime_cache=${state_dir}/cache
+runtime_xdg_config=${state_dir}/xdg-config
+runtime_xdg_data=${state_dir}/xdg-data
+runtime_npm_cache=${state_dir}/npm-cache
+runtime_npm_prefix=${state_dir}/npm-global
+runtime_bun_install=${state_dir}/bun
+runtime_bun_cache=${state_dir}/bun-cache
+
+mkdir -p "${config_dir}" /data "${runtime_home}" "${runtime_cache}" "${runtime_xdg_config}" "${runtime_xdg_data}" "${runtime_npm_cache}" "${runtime_npm_prefix}" "${runtime_bun_install}" "${runtime_bun_cache}"
+mkdir -p "${runtime_npm_prefix}/bin"
+
+export OPENCODE_CONFIG_DIR="${config_dir}"
+export OPENCODE_CONFIG="${config_dir}/opencode.json"
 export HOMEASSISTANT_URL=http://supervisor/core
 export HOMEASSISTANT_TOKEN=${SUPERVISOR_TOKEN}
-export XDG_DATA_HOME=/data
+export HOME="${runtime_home}"
+export XDG_CACHE_HOME="${runtime_cache}"
+export XDG_CONFIG_HOME="${runtime_xdg_config}"
+export XDG_DATA_HOME="${runtime_xdg_data}"
 export OPENCODE_DISABLE_AUTOUPDATE=true
-export NPM_CONFIG_CACHE=/data/npm-cache
+export NPM_CONFIG_CACHE="${runtime_npm_cache}"
+export NPM_CONFIG_PREFIX="${runtime_npm_prefix}"
+export BUN_INSTALL="${runtime_bun_install}"
+export BUN_INSTALL_CACHE_DIR="${runtime_bun_cache}"
+export PATH="${runtime_npm_prefix}/bin:${PATH}"
 
 port=$(bashio::config 'port')
 username=$(bashio::config 'username')
@@ -95,12 +125,12 @@ if bashio::config.has_value 'opencode_env_vars'; then
   done <<< "$(bashio::config 'opencode_env_vars')"
 fi
 
-if [[ ! -f /config/opencode/opencode.json ]] && [[ -f /root/.opencode/opencode.json ]]; then
-  cp /root/.opencode/opencode.json /config/opencode/opencode.json
+if [[ ! -f "${config_dir}/opencode.json" ]] && [[ -f /root/.opencode/opencode.json ]]; then
+  cp /root/.opencode/opencode.json "${config_dir}/opencode.json"
 fi
 
-if [[ ! -f /config/opencode/AGENTS.md ]] && [[ -f /root/.opencode/AGENTS.md ]]; then
-  cp /root/.opencode/AGENTS.md /config/opencode/AGENTS.md
+if [[ ! -f "${config_dir}/AGENTS.md" ]] && [[ -f /root/.opencode/AGENTS.md ]]; then
+  cp /root/.opencode/AGENTS.md "${config_dir}/AGENTS.md"
 fi
 
 binary_path="/data/.opencode/bin/opencode"
@@ -120,8 +150,6 @@ else
     fi
   fi
 fi
-
-export HOME=/config/opencode
 
 # Install user configured/requested packages
 if bashio::config.has_value 'packages'; then
@@ -171,6 +199,6 @@ if ! "${binary_path}" models --refresh; then
   bashio::log.warning 'Failed to refresh models, continuing startup'
 fi
 
-cd /config
+cd /data
 bashio::log.info "Starting OpenCode ${args[@]}"
 "${binary_path}" "${args[@]}"

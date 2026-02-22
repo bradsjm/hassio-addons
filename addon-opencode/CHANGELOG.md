@@ -1,5 +1,10 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 0.8
+
+- Keep `/config/opencode` configuration-only by moving runtime state to `/data/opencode`
+- Continue installing OpenCode at startup with optional pinned version support
+
 ## 0.7
 
 - Support pinned OpenCode versions and environment variables
