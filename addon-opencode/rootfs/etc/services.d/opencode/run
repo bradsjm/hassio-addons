@@ -200,6 +200,6 @@ if ! "${binary_path}" models --refresh; then
   bashio::log.warning 'Failed to refresh models, continuing startup'
 fi
 
-cd /data
+cd /config
 bashio::log.info "Starting OpenCode ${args[@]}"
 "${binary_path}" "${args[@]}"
