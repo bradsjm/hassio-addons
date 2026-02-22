@@ -82,6 +82,7 @@ runtime_bun_cache=${state_dir}/bun-cache
 
 mkdir -p "${config_dir}" /data "${runtime_home}" "${runtime_cache}" "${runtime_xdg_config}" "${runtime_xdg_data}" "${runtime_npm_cache}" "${runtime_npm_prefix}" "${runtime_bun_install}" "${runtime_bun_cache}"
 mkdir -p "${runtime_npm_prefix}/bin"
+mkdir -p "${runtime_npm_prefix}/lib"
 
 export OPENCODE_CONFIG_DIR="${config_dir}"
 export OPENCODE_CONFIG="${config_dir}/opencode.json"
