@@ -161,7 +161,7 @@ export NPM_CONFIG_CACHE="${runtime_npm_cache}"
 export NPM_CONFIG_PREFIX="${runtime_npm_prefix}"
 export BUN_INSTALL="${runtime_bun_install}"
 export BUN_INSTALL_CACHE_DIR="${runtime_bun_cache}"
-export PATH="${runtime_npm_prefix}/bin:${PATH}"
+export PATH="${state_dir}/.opencode/bin:${runtime_npm_prefix}/bin:${PATH}"
 export OPENCHAMBER_DATA_DIR="${openchamber_data_dir}"
 
 if bashio::config.has_value 'opencode_env_vars'; then
