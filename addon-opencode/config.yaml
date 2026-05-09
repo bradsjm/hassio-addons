@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: OpenCode Server
-version: "0.8"
+version: "0.9"
 slug: opencode
 description: OpenCode web server configured for Home Assistant
 url: "https://opencode.ai/"
@@ -35,6 +35,9 @@ options:
     opencode_env_vars: []
     packages: []
     init_commands: []
+    web_service: true
+    config_dir: "/config/opencode"
+    state_dir: "/data/opencode"
 schema:
     port: port
     username: str?
@@ -46,4 +49,7 @@ schema:
         - str
     init_commands:
         - str
+    web_service: bool?
+    config_dir: str?
+    state_dir: str?
 image: "bradsjm/{arch}-addon-opencode"

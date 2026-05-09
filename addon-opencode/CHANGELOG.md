@@ -1,5 +1,11 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 0.9
+
+- Add `web_service` option to toggle between `web` (browser UI) and `serve` (headless API) modes
+- Add `config_dir` and `state_dir` options for configurable path overrides
+- Install OpenCode binary under configured state directory
+
 ## 0.8
 
 - Keep `/config/opencode` configuration-only by moving runtime state to `/data/opencode`
