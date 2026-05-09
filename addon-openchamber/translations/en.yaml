@@ -1,0 +1,31 @@
+configuration:
+    port:
+        name: Port
+        description: Port for the OpenChamber web UI.
+    opencode_mode:
+        name: OpenCode mode
+        description: How OpenCode is provided — managed starts OpenCode internally, external connects to an existing server.
+    opencode_host:
+        name: External OpenCode host
+        description: URL of the external OpenCode server (e.g. http://192.168.1.100:4096). Only used when mode is external.
+    opencode_port:
+        name: External OpenCode port
+        description: Port of the external OpenCode server. Only used when mode is external.
+    password:
+        name: UI password
+        description: Password to protect the OpenChamber web UI. Leave empty for no authentication.
+    opencode_version:
+        name: OpenCode version pin
+        description: Pin OpenCode to a specific version (e.g. 0.6.0). Only used when mode is managed. Leave empty to install latest on startup.
+    openchamber_version:
+        name: OpenChamber version pin
+        description: Pin OpenChamber to a specific version (e.g. 1.9.10). Leave empty to install latest on startup.
+    packages:
+        name: Debian Packages to Install
+        description: Additional Debian packages to be installed and made available to OpenCode.
+    init_commands:
+        name: Initialization Commands to run
+        decription: Terminal commands to run before OpenChamber is started
+    opencode_env_vars:
+        name: OpenCode environment variables
+        description: Additional OPENCODE_ variables to export before startup, entered as KEY=value strings (e.g. OPENCODE_DISABLE_LSP_DOWNLOAD=true).

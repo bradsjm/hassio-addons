@@ -1,11 +1,11 @@
 # AGENTS.md
 
-This repository contains Home Assistant add-ons for Hyperion.NG and OpenCode.
+This repository contains Home Assistant add-ons for Hyperion.NG, OpenCode, and OpenChamber.
 Use this file as the primary guide for agentic coding work here.
 
 ## Repo Overview
 
-- Add-on paths: `addon-hyperion-ng/`, `addon-opencode/`
+- Add-on paths: `addon-hyperion-ng/`, `addon-opencode/`, `addon-openchamber/`
 - Core metadata: `repository.json`
 - Hyperion config: `addon-hyperion-ng/config.json`
 - Hyperion build metadata: `addon-hyperion-ng/build.json`
@@ -14,6 +14,11 @@ Use this file as the primary guide for agentic coding work here.
 - OpenCode config: `addon-opencode/config.yaml`
 - OpenCode build metadata: `addon-opencode/build.yaml`
 - OpenCode container definition: `addon-opencode/Dockerfile`
+- OpenCode runtime entrypoint: `addon-opencode/rootfs/etc/services.d/opencode/run`
+- OpenChamber config: `addon-openchamber/config.yaml`
+- OpenChamber build metadata: `addon-openchamber/build.yaml`
+- OpenChamber container definition: `addon-openchamber/Dockerfile`
+- OpenChamber runtime entrypoint: `addon-openchamber/rootfs/etc/services.d/openchamber/run`
 - Helper scripts: `addon-hyperion-ng/download-hyperion.sh`, `.github/scripts/*`
 
 ## Build / Lint / Test Commands
@@ -34,6 +39,12 @@ Use the scripts below for validation and smoke testing.
 
 - Build all OpenCode architectures:
   `./.github/scripts/build-opencode.sh all`
+
+- Build OpenChamber add-on image for a single architecture:
+  `./.github/scripts/build-openchamber.sh amd64`
+
+- Build all OpenChamber architectures:
+  `./.github/scripts/build-openchamber.sh all`
 
 Notes:
 - The build script uses `homeassistant/amd64-builder` in Docker.
@@ -123,7 +134,7 @@ This script reads and updates `addon-hyperion-ng/config.json` using `jq`.
 
 ## CI / GitHub Actions
 
-- The workflow is in `.github/workflows/addon-hyperion-ng.yml`.
+- Workflows in `.github/workflows/`: `addon-hyperion-ng.yml`, `addon-opencode.yml`, `addon-openchamber.yml`
 - CI validates latest release and optionally updates `config.json`.
 - CI uses helper scripts in `.github/scripts/`.
 

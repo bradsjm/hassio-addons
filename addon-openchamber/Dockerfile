@@ -1,0 +1,90 @@
+# https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
+ARG BUILD_FROM=ghcr.io/hassio-addons/debian-base:stable
+FROM $BUILD_FROM
+
+# Execute during the build of the image
+ARG BUILD_ARCH
+ARG HA_CLI_VERSION="4.45.0"
+
+# Set shell
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# Setup base
+RUN \
+    export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update \
+    \
+    && apt-get install -q -y --no-install-recommends \
+    bash \
+    build-essential \
+    ca-certificates \
+    curl \
+    g++ \
+    git \
+    gnupg \
+    jq \
+    make \
+    mariadb-client \
+    mosquitto-clients \
+    openssh-client \
+    ripgrep \
+    nano \
+    python3 \
+    python3-pip \
+    tar \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 20+ (required by OpenChamber)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -q -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:${PATH}"
+
+# Install HA CLI
+RUN curl -L -s -o /usr/bin/ha \
+    "https://github.com/home-assistant/cli/releases/download/${HA_CLI_VERSION}/ha_${BUILD_ARCH}" \
+    && chmod a+x /usr/bin/ha
+
+# Install cloudflared (latest) for tunnel support
+RUN curl -L -s -o /usr/local/bin/cloudflared \
+    "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$(echo ${BUILD_ARCH} | sed 's/aarch64/arm64/')" \
+    && chmod +x /usr/local/bin/cloudflared
+
+# Copy root filesystem
+COPY rootfs /
+
+# Health check
+HEALTHCHECK --start-period=10m \
+    CMD curl --fail http://127.0.0.1:3000 || exit 1
+
+
+# Build arguments
+ARG BUILD_ARCH
+ARG BUILD_DATE
+ARG BUILD_DESCRIPTION
+ARG BUILD_NAME
+ARG BUILD_REF
+ARG BUILD_REPOSITORY
+ARG BUILD_VERSION
+
+# Labels
+LABEL \
+    io.hass.name="${BUILD_NAME}" \
+    io.hass.description="${BUILD_DESCRIPTION}" \
+    io.hass.arch="${BUILD_ARCH}" \
+    io.hass.type="addon" \
+    io.hass.version=${BUILD_VERSION} \
+    maintainer="Jonathan Bradshaw <jb@nrgup.net>" \
+    org.opencontainers.image.title="${BUILD_NAME}" \
+    org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
+    org.opencontainers.image.vendor="Home Assistant Community Apps" \
+    org.opencontainers.image.authors="Jonathan Bradshaw <jb@nrgup.net>" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \
+    org.opencontainers.image.documentation="https://github.com/${BUILD_REPOSITORY}/blob/main/README.md" \
+    org.opencontainers.image.created=${BUILD_DATE} \
+    org.opencontainers.image.revision=${BUILD_REF} \
+    org.opencontainers.image.version=${BUILD_VERSION}

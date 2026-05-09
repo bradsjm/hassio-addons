@@ -1,0 +1,61 @@
+# https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
+name: OpenChamber
+version: "0.1"
+slug: openchamber
+description: OpenChamber web interface for OpenCode AI agent
+url: "https://openchamber.dev/"
+startup: application
+host_network: false
+apparmor: false
+hassio_api: true
+homeassistant_api: true
+hassio_role: manager
+stage: experimental
+arch:
+    - aarch64
+    - amd64
+init: false
+ingress: false
+ingress_port: 0
+ingress_stream: true
+panel_icon: mdi:alpha-o-box
+map:
+    - config:rw
+    - share:rw
+ports:
+    3000/tcp: 3000
+ports_description:
+    3000/tcp: OpenChamber Web UI
+webui: "http://[HOST]:[PORT:3000]"
+options:
+    port: 3000
+    opencode_mode: "managed"
+    opencode_host: ""
+    opencode_port: 4096
+    password: ""
+    opencode_version: ""
+    openchamber_version: ""
+    opencode_env_vars: []
+    packages: []
+    init_commands: []
+    config_dir: "/config/opencode"
+    openchamber_data_dir: "/data/openchamber"
+    state_dir: "/data/opencode"
+schema:
+    port: port
+    opencode_mode: "list(managed|external)"
+    opencode_host: str?
+    opencode_port: port?
+    password: password?
+    opencode_version: str?
+    openchamber_version: str?
+    opencode_env_vars:
+        - str
+    packages:
+        - str
+    init_commands:
+        - str
+    config_dir: str?
+    openchamber_data_dir: str?
+    state_dir: str?
+image: "bradsjm/{arch}-addon-openchamber"
