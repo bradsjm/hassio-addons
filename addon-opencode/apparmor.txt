@@ -2,7 +2,24 @@
 
 profile opencode flags=(attach_disconnected,mediate_deleted) {
   #include <abstractions/base>
-  #include <abstractions/bash>
+
+  file,
+  signal (send) set=(kill,term,int,hup,cont),
+
+  /init ix,
+  /bin/** ix,
+  /usr/bin/** ix,
+  /run/{s6,s6-rc*,service}/** ix,
+  /package/** ix,
+  /command/** ix,
+  /etc/services.d/** rwix,
+  /etc/cont-init.d/** rwix,
+  /etc/cont-finish.d/** rwix,
+  /run/{,**} rwk,
+  /dev/tty rw,
+
+  /usr/lib/bashio/** ix,
+  /tmp/** rwk,
 
   network inet stream,
   network inet6 stream,
@@ -18,28 +35,15 @@ profile opencode flags=(attach_disconnected,mediate_deleted) {
   capability setgid,
   capability setuid,
 
-  /bin/** ix,
-  /usr/bin/** ix,
   /usr/local/bin/** ix,
-  /etc/s6/** ix,
-  /run/{s6,s6-rc*,service}/** rwix,
-  /package/** ix,
-  /command/** ix,
-  /etc/services.d/** rwix,
-  /etc/cont-init.d/** rwix,
-  /etc/cont-finish.d/** rwix,
 
   /data/opencode/.opencode/bin/opencode ix,
   /data/opencode/npm-global/bin/** ix,
-
-  /tmp/** ix,
 
   /config/** rw,
   /config/opencode/** rw,
   /data/** rw,
   /share/** rw,
-  /tmp/** rw,
-  /run/** rw,
 
   / r,
   /** r,
@@ -55,9 +59,6 @@ profile opencode flags=(attach_disconnected,mediate_deleted) {
   /dev/random r,
   /dev/urandom r,
   /dev/zero rw,
-  /dev/tty rw,
   /dev/pts/** rw,
   /dev/console rw,
-
-  /run/s6-linux-init-container-results/exitcode rw,
 }
