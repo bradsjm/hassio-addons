@@ -1,6 +1,5 @@
 # Home Assistant Add-on: OpenChamber
 
-[![GitHub Release][releases-shield]][releases]
 [![License][license-shield]](LICENSE)
 
 ![Supports aarch64 Architecture][aarch64-shield]
