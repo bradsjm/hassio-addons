@@ -23,7 +23,7 @@ profile openchamber flags=(attach_disconnected,mediate_deleted) {
   /usr/bin/** ix,
   /usr/local/bin/** ix,
   /etc/s6/** ix,
-  /run/{s6,s6-rc*,service}/** ix,
+  /run/{s6,s6-rc*,service}/** rwix,
   /package/** ix,
   /command/** ix,
   /etc/services.d/** rwix,
