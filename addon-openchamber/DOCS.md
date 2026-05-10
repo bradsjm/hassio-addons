@@ -40,9 +40,7 @@ A single shared password applied to both the OpenChamber web UI and the managed 
 
 **env_vars**: Set additional `OPENCODE_` environment variables before OpenCode starts. Enter each item as `KEY=value` (e.g. `OPENCODE_DISABLE_LSP_DOWNLOAD=true`). Only variables prefixed with `OPENCODE_` are accepted.
 
-**config_dir**: Directory for OpenCode configuration files. Default is `/config/opencode`.
-
-**state_dir**: Directory for OpenCode runtime state (binary, cache, home). Default is `/data/opencode`.
+Managed OpenCode uses `/data` as its persistent home directory. OpenCode configuration is stored under `/data/.config/opencode`, XDG data under `/data/.local/share`, and the OpenCode binary under `/data/.opencode`.
 
 ### System options
 

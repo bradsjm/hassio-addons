@@ -34,13 +34,9 @@ Set this to a specific OpenCode version (for example `0.6.0`) to pin the add-on 
 
 When enabled (default), OpenCode runs the `web` command providing a web UI for browser-based interaction. When disabled, OpenCode runs the `serve` command instead, which starts a headless API server suitable for programmatic access or attaching CLI clients. The server's OpenAPI docs are available at `http://<host>:<port>/doc`.
 
-### Config directory
+### Persistent runtime storage
 
-The directory where OpenCode configuration files (`opencode.json`, `AGENTS.md`) are stored. Defaults to `/config/opencode`. Change this to relocate persistent configuration.
-
-### State directory
-
-The directory where OpenCode runtime state is stored — binary, caches, XDG directories, npm/bun installs. Defaults to `/data/opencode`. Change this to relocate all runtime data (requires re-download of OpenCode binary on next start).
+OpenCode uses `/data` as its persistent home directory. OpenCode configuration is stored under `/data/.config/opencode`, XDG data under `/data/.local/share`, and the OpenCode binary under `/data/.opencode`.
 
 ### OpenCode environment variables
 

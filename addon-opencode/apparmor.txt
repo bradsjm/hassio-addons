@@ -38,12 +38,11 @@ profile opencode flags=(attach_disconnected,mediate_deleted) {
 
   /usr/local/bin/** ix,
 
-  /data/opencode/.opencode/bin/opencode rwix,
-  /data/opencode/.opencode/** rw,
-  /data/opencode/npm-global/bin/** rwix,
+  /data/.opencode/bin/opencode rwix,
+  /data/.opencode/** rw,
+  /data/npm-global/bin/** rwix,
 
   /config/** rw,
-  /config/opencode/** rw,
   /data/** rw,
   /share/** rw,
 

@@ -11,12 +11,11 @@ declare username
 declare password
 declare opencode_version
 declare web_service
-declare config_dir
-declare state_dir
 declare env_entry
 declare binary_path
 declare runtime_home
 declare runtime_cache
+declare runtime_opencode_config
 declare runtime_xdg_config
 declare runtime_xdg_data
 declare runtime_npm_cache
@@ -56,12 +55,12 @@ install_opencode() {
   fi
 
   if [[ -n "${requested_version}" ]]; then
-    if ! HOME="${state_dir}" bash "${installer_script}" --no-modify-path --version "${requested_version}"; then
+    if ! HOME="${HOME}" bash "${installer_script}" --no-modify-path --version "${requested_version}"; then
       rm -f "${installer_script}"
       return 1
     fi
   else
-    if ! HOME="${state_dir}" bash "${installer_script}" --no-modify-path; then
+    if ! HOME="${HOME}" bash "${installer_script}" --no-modify-path; then
       rm -f "${installer_script}"
       return 1
     fi
@@ -70,21 +69,28 @@ install_opencode() {
   rm -f "${installer_script}"
 }
 
-runtime_home=${state_dir}/home
-runtime_cache=${state_dir}/cache
-runtime_xdg_config=${state_dir}/xdg-config
-runtime_xdg_data=${state_dir}/xdg-data
-runtime_npm_cache=${state_dir}/npm-cache
-runtime_npm_prefix=${state_dir}/npm-global
-runtime_bun_install=${state_dir}/bun
-runtime_bun_cache=${state_dir}/bun-cache
+port=$(bashio::config 'port')
+username=$(bashio::config 'username')
+password=$(bashio::config 'password')
+opencode_version=$(bashio::config 'opencode_version')
+web_service=$(bashio::config 'web_service' 'true')
 
-mkdir -p "${config_dir}" /data "${runtime_home}" "${runtime_cache}" "${runtime_xdg_config}" "${runtime_xdg_data}" "${runtime_npm_cache}" "${runtime_npm_prefix}" "${runtime_bun_install}" "${runtime_bun_cache}"
+runtime_home=/data
+runtime_cache=${runtime_home}/cache
+runtime_opencode_config=${runtime_home}/.config/opencode
+runtime_xdg_config=${runtime_home}/.config
+runtime_xdg_data=${runtime_home}/.local/share
+runtime_npm_cache=${runtime_home}/npm-cache
+runtime_npm_prefix=${runtime_home}/npm-global
+runtime_bun_install=${runtime_home}/bun
+runtime_bun_cache=${runtime_home}/bun-cache
+
+mkdir -p "${runtime_home}" "${runtime_cache}" "${runtime_opencode_config}" "${runtime_xdg_config}" "${runtime_xdg_data}" "${runtime_npm_cache}" "${runtime_npm_prefix}" "${runtime_bun_install}" "${runtime_bun_cache}"
 mkdir -p "${runtime_npm_prefix}/bin"
 mkdir -p "${runtime_npm_prefix}/lib"
 
-export OPENCODE_CONFIG_DIR="${config_dir}"
-export OPENCODE_CONFIG="${config_dir}/opencode.json"
+export OPENCODE_CONFIG_DIR="${runtime_opencode_config}"
+export OPENCODE_CONFIG="${runtime_opencode_config}/opencode.json"
 export HOMEASSISTANT_URL=http://supervisor/core
 export HOMEASSISTANT_TOKEN=${SUPERVISOR_TOKEN}
 export HOME="${runtime_home}"
@@ -97,14 +103,6 @@ export NPM_CONFIG_PREFIX="${runtime_npm_prefix}"
 export BUN_INSTALL="${runtime_bun_install}"
 export BUN_INSTALL_CACHE_DIR="${runtime_bun_cache}"
 export PATH="${runtime_npm_prefix}/bin:${PATH}"
-
-port=$(bashio::config 'port')
-username=$(bashio::config 'username')
-password=$(bashio::config 'password')
-opencode_version=$(bashio::config 'opencode_version')
-web_service=$(bashio::config 'web_service' 'true')
-config_dir=$(bashio::config 'config_dir' '/config/opencode')
-state_dir=$(bashio::config 'state_dir' '/data/opencode')
 
 if [[ "${opencode_version}" == "null" ]]; then
   opencode_version=""
@@ -128,15 +126,15 @@ if bashio::config.has_value 'opencode_env_vars'; then
   done <<< "$(bashio::config 'opencode_env_vars')"
 fi
 
-if [[ ! -f "${config_dir}/opencode.json" ]] && [[ -f /root/.opencode/opencode.json ]]; then
-  cp /root/.opencode/opencode.json "${config_dir}/opencode.json"
+if [[ ! -f "${runtime_opencode_config}/opencode.json" ]] && [[ -f /root/.opencode/opencode.json ]]; then
+  cp /root/.opencode/opencode.json "${runtime_opencode_config}/opencode.json"
 fi
 
-if [[ ! -f "${config_dir}/AGENTS.md" ]] && [[ -f /root/.opencode/AGENTS.md ]]; then
-  cp /root/.opencode/AGENTS.md "${config_dir}/AGENTS.md"
+if [[ ! -f "${runtime_opencode_config}/AGENTS.md" ]] && [[ -f /root/.opencode/AGENTS.md ]]; then
+  cp /root/.opencode/AGENTS.md "${runtime_opencode_config}/AGENTS.md"
 fi
 
-binary_path="${state_dir}/.opencode/bin/opencode"
+binary_path="${HOME}/.opencode/bin/opencode"
 
 if [[ -n "${opencode_version}" ]]; then
   bashio::log.info "Installing pinned OpenCode version ${opencode_version}"

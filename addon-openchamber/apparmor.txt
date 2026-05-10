@@ -39,22 +39,20 @@ profile openchamber flags=(attach_disconnected,mediate_deleted) {
 
   /usr/local/bin/** ix,
 
-  /data/opencode/.opencode/bin/opencode rwix,
-  /data/opencode/.opencode/** rw,
-  /data/opencode/npm-global/bin/** rwix,
+  /data/.opencode/bin/opencode rwix,
+  /data/.opencode/** rw,
+  /data/npm-global/bin/** rwix,
 
   /usr/local/bin/cloudflared ix,
   /usr/bin/ssh-keygen ix,
 
   /config/** rw,
-  /config/opencode/** rw,
   /data/** rw,
   /share/** rw,
 
-  /data/opencode/home/** rw,
-  /data/opencode/home/.ssh/** rw,
-  /data/opencode/home/.ssh/id_ed25519 rw,
-  /data/opencode/home/.ssh/id_ed25519.pub rw,
+  /data/.ssh/** rw,
+  /data/.ssh/id_ed25519 rw,
+  /data/.ssh/id_ed25519.pub rw,
 
   / r,
   /** r,

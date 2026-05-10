@@ -32,12 +32,6 @@ configuration:
         env_vars:
             name: OpenCode environment variables
             description: Additional OPENCODE_ variables to export before startup, entered as KEY=value strings (for example OPENCODE_DISABLE_LSP_DOWNLOAD=true).
-        config_dir:
-            name: OpenCode config directory
-            description: Directory for OpenCode configuration files.
-        state_dir:
-            name: OpenCode state directory
-            description: Directory for OpenCode runtime state, including binary, cache, and home files.
     password:
         name: Shared password
         description: Password for both the OpenChamber web UI and managed OpenCode server auth. OpenCode uses username opencode.

@@ -36,8 +36,6 @@ options:
     packages: []
     init_commands: []
     web_service: true
-    config_dir: "/config/opencode"
-    state_dir: "/data/opencode"
 schema:
     port: port
     username: str?
@@ -50,6 +48,4 @@ schema:
     init_commands:
         - str
     web_service: bool?
-    config_dir: str?
-    state_dir: str?
 image: "bradsjm/{arch}-addon-opencode"

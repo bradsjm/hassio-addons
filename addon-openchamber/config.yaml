@@ -38,8 +38,6 @@ options:
     expose: false
     version: ""
     env_vars: []
-    config_dir: "/config/opencode"
-    state_dir: "/data/opencode"
   password: ""
   packages: []
   init_commands: []
@@ -56,8 +54,6 @@ schema:
     version: str?
     env_vars:
       - str
-    config_dir: str?
-    state_dir: str?
   password: password?
   packages:
     - str

@@ -3,12 +3,12 @@
 ## 0.9
 
 - Add `web_service` option to toggle between `web` (browser UI) and `serve` (headless API) modes
-- Add `config_dir` and `state_dir` options for configurable path overrides
-- Install OpenCode binary under configured state directory
+- Use fixed persistent runtime paths under `/data`
+- Install OpenCode binary under `/data/.opencode`
 
 ## 0.8
 
-- Keep `/config/opencode` configuration-only by moving runtime state to `/data/opencode`
+- Separate configuration and runtime state paths
 - Continue installing OpenCode at startup with optional pinned version support
 
 ## 0.7
