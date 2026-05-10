@@ -12,6 +12,8 @@ declare opencode_mode
 declare opencode_host
 declare opencode_port
 declare opencode_version
+declare opencode_expose
+declare opencode_bind
 declare openchamber_version
 declare config_dir
 declare openchamber_data_dir
@@ -27,7 +29,6 @@ declare runtime_npm_cache
 declare runtime_npm_prefix
 declare runtime_bun_install
 declare runtime_bun_cache
-declare internal_opencode_port=4095
 declare -a args
 
 log_binary_diagnostics() {
@@ -93,10 +94,10 @@ wait_for_opencode() {
   local max_attempts=30
   local attempt=1
 
-  bashio::log.info "Waiting for OpenCode server on port ${internal_opencode_port}"
+  bashio::log.info "Waiting for OpenCode server on port ${opencode_port}"
 
   while [[ ${attempt} -le ${max_attempts} ]]; do
-    if curl -s -f "http://127.0.0.1:${internal_opencode_port}/global/health" > /dev/null 2>&1; then
+    if curl -s -f "http://127.0.0.1:${opencode_port}/global/health" > /dev/null 2>&1; then
       bashio::log.info "OpenCode server is ready"
       return 0
     fi
@@ -109,16 +110,17 @@ wait_for_opencode() {
 }
 
 # Read config first so paths are resolved correctly
-port=$(bashio::config 'port')
-opencode_mode=$(bashio::config 'opencode_mode')
-opencode_host=$(bashio::config 'opencode_host')
-opencode_port=$(bashio::config 'opencode_port')
+port=$(bashio::config 'openchamber.port')
 password=$(bashio::config 'password')
-opencode_version=$(bashio::config 'opencode_version')
-openchamber_version=$(bashio::config 'openchamber_version')
-config_dir=$(bashio::config 'config_dir' '/config/opencode')
-openchamber_data_dir=$(bashio::config 'openchamber_data_dir' '/data/openchamber')
-state_dir=$(bashio::config 'state_dir' '/data/opencode')
+opencode_mode=$(bashio::config 'opencode.mode')
+opencode_host=$(bashio::config 'opencode.host')
+opencode_port=$(bashio::config 'opencode.port' 4096)
+opencode_expose=$(bashio::config 'opencode.expose' 'false')
+opencode_version=$(bashio::config 'opencode.version')
+openchamber_version=$(bashio::config 'openchamber.version')
+config_dir=$(bashio::config 'opencode.config_dir' '/config/opencode')
+openchamber_data_dir=$(bashio::config 'openchamber.data_dir' '/data/openchamber')
+state_dir=$(bashio::config 'opencode.state_dir' '/data/opencode')
 
 if [[ "${opencode_host}" == "null" ]]; then
   opencode_host=""
@@ -134,6 +136,12 @@ fi
 
 opencode_version=${opencode_version#v}
 openchamber_version=${openchamber_version#v}
+
+# Resolve OpenCode bind address
+opencode_bind="127.0.0.1"
+if bashio::var.true "${opencode_expose}"; then
+  opencode_bind="0.0.0.0"
+fi
 
 runtime_home=${state_dir}/home
 runtime_cache=${state_dir}/cache
@@ -164,7 +172,7 @@ export BUN_INSTALL_CACHE_DIR="${runtime_bun_cache}"
 export PATH="${state_dir}/.opencode/bin:${runtime_npm_prefix}/bin:${PATH}"
 export OPENCHAMBER_DATA_DIR="${openchamber_data_dir}"
 
-if bashio::config.has_value 'opencode_env_vars'; then
+if bashio::config.has_value 'opencode.env_vars'; then
   while IFS= read -r env_entry; do
     if [[ -z "${env_entry}" ]]; then
       continue
@@ -177,11 +185,17 @@ if bashio::config.has_value 'opencode_env_vars'; then
 
     export "${env_entry}"
     bashio::log.info "Applied OpenCode environment override: ${env_entry%%=*}"
-  done <<< "$(bashio::config 'opencode_env_vars')"
+  done <<< "$(bashio::config 'opencode.env_vars')"
+fi
+
+# Set shared password for both OpenCode server auth and OpenChamber UI
+if [[ -n "${password}" && "${password}" != "null" ]]; then
+  export OPENCODE_SERVER_USERNAME="opencode"
+  export OPENCODE_SERVER_PASSWORD="${password}"
 fi
 
 if [[ "${opencode_mode}" == "external" ]] && [[ -z "${opencode_host}" ]]; then
-  bashio::exit.nok "opencode_mode is 'external' but opencode_host is empty. Set opencode_host to your OpenCode server URL."
+  bashio::exit.nok "opencode.mode is 'external' but opencode.host is empty. Set opencode.host to your OpenCode server URL."
 fi
 
 if bashio::config.has_value 'packages'; then
@@ -275,8 +289,8 @@ if [[ "${opencode_mode}" == "managed" ]]; then
     bashio::log.warning 'Failed to refresh models, continuing startup'
   fi
 
-  bashio::log.info "Starting OpenCode headless API server on port ${internal_opencode_port}"
-  "${binary_path}" serve --port "${internal_opencode_port}" --hostname 127.0.0.1 &
+  bashio::log.info "Starting OpenCode headless API server on port ${opencode_port}"
+  "${binary_path}" serve --port "${opencode_port}" --hostname "${opencode_bind}" &
   opencode_pid=$!
 
   if ! wait_for_opencode; then
@@ -300,8 +314,8 @@ fi
 export OPENCODE_SKIP_START=true
 
 if [[ "${opencode_mode}" == "managed" ]]; then
-  export OPENCODE_HOST="http://127.0.0.1:${internal_opencode_port}"
-  export OPENCODE_PORT="${internal_opencode_port}"
+  export OPENCODE_HOST="http://127.0.0.1:${opencode_port}"
+  export OPENCODE_PORT="${opencode_port}"
 elif [[ -n "${opencode_host}" ]]; then
   export OPENCODE_HOST="${opencode_host}"
   if [[ -n "${opencode_port}" && "${opencode_port}" != "null" ]]; then

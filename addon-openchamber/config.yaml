@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: OpenChamber
-version: "0.1"
+version: "0.2"
 slug: openchamber
 description: OpenChamber web interface for OpenCode AI agent
 url: "https://openchamber.dev/"
@@ -21,38 +21,46 @@ map:
   - share:rw
 ports:
   3000/tcp: 3000
+  4096/tcp: 4096
 ports_description:
   3000/tcp: OpenChamber Web UI
+  4096/tcp: OpenCode API (requires opencode.expose enabled)
 webui: "http://[HOST]:[PORT:3000]"
 options:
-  port: 3000
-  opencode_mode: "managed"
-  opencode_host: ""
-  opencode_port: 4096
+  openchamber:
+    port: 3000
+    version: ""
+    data_dir: "/data/openchamber"
+  opencode:
+    mode: "managed"
+    host: ""
+    port: 4096
+    expose: false
+    version: ""
+    env_vars: []
+    config_dir: "/config/opencode"
+    state_dir: "/data/opencode"
   password: ""
-  opencode_version: ""
-  openchamber_version: ""
-  opencode_env_vars: []
   packages: []
   init_commands: []
-  config_dir: "/config/opencode"
-  openchamber_data_dir: "/data/openchamber"
-  state_dir: "/data/opencode"
 schema:
-  port: port
-  opencode_mode: "list(managed|external)"
-  opencode_host: str?
-  opencode_port: port?
+  openchamber:
+    port: port
+    version: str?
+    data_dir: str?
+  opencode:
+    mode: "list(managed|external)"
+    host: str?
+    port: port?
+    expose: bool?
+    version: str?
+    env_vars:
+      - str
+    config_dir: str?
+    state_dir: str?
   password: password?
-  opencode_version: str?
-  openchamber_version: str?
-  opencode_env_vars:
-    - str
   packages:
     - str
   init_commands:
     - str
-  config_dir: str?
-  openchamber_data_dir: str?
-  state_dir: str?
 image: "bradsjm/{arch}-addon-openchamber"

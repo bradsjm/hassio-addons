@@ -10,33 +10,45 @@ In managed mode, this add-on automatically installs [ha-mcp](https://github.com/
 
 ## App configuration
 
-You can configure the add-on through the **Configuration** tab in the add-on panel.
+You can configure the add-on through the **Configuration** tab in the add-on panel. If you expose the OpenCode port (see below), the port mapping must be set on the **Network** tab by assigning a host port to `4096/tcp`.
 
-### Port
+### Shared password
 
-The port on which the OpenChamber web UI listens. The default is `3000`.
+A single shared password applied to both the OpenChamber web UI and the managed OpenCode server. OpenCode server auth uses the hardcoded username `opencode`. Leave empty for no authentication (not recommended for exposed networks).
 
-### OpenCode mode
+### OpenChamber options
 
-- **managed** (default): The add-on installs and runs OpenCode internally. OpenChamber connects to this managed instance automatically. This is the recommended mode for most users.
-- **external**: OpenChamber connects to an existing OpenCode server (e.g. the [OpenCode add-on](https://github.com/bradsjm/hassio-addons)). You must provide the `opencode_host` and optionally `opencode_port`.
+**port**: The port on which the OpenChamber web UI listens. Default is `3000`.
 
-### External OpenCode host / port
+**version pin**: Pin OpenChamber to a specific version (e.g. `1.9.10`). Leave empty to install the latest release.
 
-When mode is `external`, set the URL of the running OpenCode server (e.g. `http://192.168.1.100:4096`). The port defaults to `4096`.
+**data_dir**: Persistent storage directory for OpenChamber data. Default is `/data/openchamber`.
 
-### UI password
+### OpenCode options
 
-A single shared password to protect the OpenChamber web UI. Leave empty for no authentication (not recommended for exposed networks).
+**mode**:
+- `managed` (default): The add-on installs and runs OpenCode internally. OpenChamber connects to this managed instance automatically.
+- `external`: OpenChamber connects to an existing OpenCode server (e.g. the [OpenCode add-on](https://github.com/bradsjm/hassio-addons)). You must provide the `host` and optionally `port`.
 
-### Version pins
+**host**: When mode is `external`, the full URL of the running OpenCode server (e.g. `http://192.168.1.100:4096`).
 
-- **OpenCode version pin**: Pin OpenCode to a specific version (e.g. `0.6.0`). Only used in managed mode. Leave empty to install latest.
-- **OpenChamber version pin**: Pin OpenChamber to a specific version (e.g. `1.9.10`). Leave empty to install latest.
+**port**: The port OpenCode listens on. In managed mode this is the internal port (default `4096`). In external mode this is the remote server port.
 
-### OpenCode environment variables
+**expose**: When `true`, the managed OpenCode server binds to `0.0.0.0:4096`, allowing external clients to connect directly. Requires the `4096/tcp` port mapping to be set on the Network tab. Default is `false`.
 
-Use this option to set additional `OPENCODE_` environment variables before OpenCode starts. Enter each item as `KEY=value` (e.g. `OPENCODE_DISABLE_LSP_DOWNLOAD=true`). Only variables prefixed with `OPENCODE_` are accepted.
+**version pin**: Pin OpenCode to a specific version (e.g. `0.6.0`). Only used in managed mode. Leave empty to install latest.
+
+**env_vars**: Set additional `OPENCODE_` environment variables before OpenCode starts. Enter each item as `KEY=value` (e.g. `OPENCODE_DISABLE_LSP_DOWNLOAD=true`). Only variables prefixed with `OPENCODE_` are accepted.
+
+**config_dir**: Directory for OpenCode configuration files. Default is `/config/opencode`.
+
+**state_dir**: Directory for OpenCode runtime state (binary, cache, home). Default is `/data/opencode`.
+
+### System options
+
+**packages**: Additional Ubuntu packages to install on startup (e.g. `htop`, `nmap`).
+
+**init_commands**: Shell commands to execute on startup before launching OpenChamber.
 
 ## Accessing the Web Interface
 
@@ -45,6 +57,8 @@ After starting the add-on:
 1. Open your web browser and navigate to `http://<home-assistant-host>:3000`
 2. If a password is configured, enter it at the login prompt
 3. You can now interact with OpenCode through the OpenChamber web interface
+
+To access the OpenCode API directly from external clients, enable `opencode.expose` in the Configuration tab and assign a host port to `4096/tcp` in the Network tab.
 
 ## Support
 

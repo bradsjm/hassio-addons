@@ -16,7 +16,6 @@ RUN \
     \
     && apt-get install -q -y --no-install-recommends \
     bash \
-    busybox \
     ca-certificates \
     curl \
     git \
@@ -33,10 +32,6 @@ RUN \
     vim \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Busybox
-RUN /usr/bin/busybox --install
-
-# Install UV
 RUN curl -fsSL https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
 
