@@ -1,0 +1,72 @@
+#include <tunables/global>
+
+profile openchamber flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+  #include <abstractions/bash>
+  #include <abstractions/ssl_certs>
+
+  network inet stream,
+  network inet6 stream,
+  network inet dgram,
+  network inet6 dgram,
+  network netlink raw,
+  network unix stream,
+
+  capability net_bind_service,
+  capability dac_override,
+  capability dac_read_search,
+  capability chown,
+  capability setgid,
+  capability setuid,
+
+  /bin/** ix,
+  /usr/bin/** ix,
+  /usr/local/bin/** ix,
+  /etc/s6/** ix,
+  /run/{s6,s6-rc*,service}/** ix,
+  /package/** ix,
+  /command/** ix,
+  /etc/services.d/** rwix,
+  /etc/cont-init.d/** rwix,
+  /etc/cont-finish.d/** rwix,
+
+  /data/opencode/.opencode/bin/opencode ix,
+  /data/opencode/npm-global/bin/** ix,
+
+  /usr/local/bin/cloudflared ix,
+  /usr/bin/ssh-keygen ix,
+
+  /tmp/** ix,
+
+  /config/** rw,
+  /config/opencode/** rw,
+  /data/** rw,
+  /share/** rw,
+  /tmp/** rw,
+  /run/** rw,
+
+  /data/opencode/home/** rw,
+  /data/opencode/home/.ssh/** rw,
+  /data/opencode/home/.ssh/id_ed25519 rw,
+  /data/opencode/home/.ssh/id_ed25519.pub rw,
+
+  / r,
+  /** r,
+
+  /lib/** mr,
+  /usr/lib/** mr,
+  /usr/local/lib/** mr,
+
+  deny /proc/** rwl,
+  deny /sys/** rwl,
+
+  /dev/null rw,
+  /dev/random r,
+  /dev/urandom r,
+  /dev/zero rw,
+  /dev/tty rw,
+  /dev/pts/** rw,
+  /dev/console rw,
+
+  /run/s6-linux-init-container-results/exitcode rw,
+}

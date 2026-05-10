@@ -6,7 +6,7 @@ description: OpenChamber web interface for OpenCode AI agent
 url: "https://openchamber.dev/"
 startup: application
 host_network: false
-apparmor: false
+apparmor: true
 hassio_api: true
 homeassistant_api: true
 hassio_role: manager

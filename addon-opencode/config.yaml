@@ -6,7 +6,7 @@ description: OpenCode web server configured for Home Assistant
 url: "https://opencode.ai/"
 startup: application
 host_network: false
-apparmor: false
+apparmor: true
 hassio_api: true
 homeassistant_api: true
 hassio_role: manager
