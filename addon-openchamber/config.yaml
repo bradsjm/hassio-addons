@@ -20,7 +20,7 @@ map:
   - config:rw
   - share:rw
 ports:
-  3000/tcp: null
+  3000/tcp: 3000
 ports_description:
   3000/tcp: OpenChamber Web UI
 webui: "http://[HOST]:[PORT:3000]"

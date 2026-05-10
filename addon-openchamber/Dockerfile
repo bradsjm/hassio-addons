@@ -16,6 +16,7 @@ RUN \
     \
     && apt-get install -q -y --no-install-recommends \
     bash \
+    busybox \
     build-essential \
     ca-certificates \
     curl \
@@ -34,6 +35,9 @@ RUN \
     tar \
     vim \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Busybox
+RUN /usr/bin/busybox --install
 
 # Install Node.js 20+ (required by OpenChamber)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
