@@ -39,8 +39,9 @@ profile openchamber flags=(attach_disconnected,mediate_deleted) {
 
   /usr/local/bin/** ix,
 
-  /data/opencode/.opencode/bin/opencode ix,
-  /data/opencode/npm-global/bin/** ix,
+  /data/opencode/.opencode/bin/opencode rwix,
+  /data/opencode/.opencode/** rw,
+  /data/opencode/npm-global/bin/** rwix,
 
   /usr/local/bin/cloudflared ix,
   /usr/bin/ssh-keygen ix,
@@ -62,8 +63,8 @@ profile openchamber flags=(attach_disconnected,mediate_deleted) {
   /usr/lib/** mr,
   /usr/local/lib/** mr,
 
-  deny /proc/** rwl,
-  deny /sys/** rwl,
+  deny /proc/** wl,
+  deny /sys/** wl,
 
   /dev/null rw,
   /dev/random r,
