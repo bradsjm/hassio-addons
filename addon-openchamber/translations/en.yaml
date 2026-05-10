@@ -1,31 +1,49 @@
 configuration:
-    port:
-        name: Port
-        description: Port for the OpenChamber web UI.
-    opencode_mode:
-        name: OpenCode mode
-        description: How OpenCode is provided — managed starts OpenCode internally, external connects to an existing server.
-    opencode_host:
-        name: External OpenCode host
-        description: URL of the external OpenCode server (e.g. http://192.168.1.100:4096). Only used when mode is external.
-    opencode_port:
-        name: External OpenCode port
-        description: Port of the external OpenCode server. Only used when mode is external.
+    openchamber:
+        name: OpenChamber
+        description: OpenChamber web interface options.
+        port:
+            name: Port
+            description: Port for the OpenChamber web UI.
+        version:
+            name: OpenChamber version pin
+            description: Pin OpenChamber to a specific version (for example 1.9.10). Leave empty to install latest on startup.
+        data_dir:
+            name: OpenChamber data directory
+            description: Persistent storage directory for OpenChamber data.
+    opencode:
+        name: OpenCode
+        description: OpenCode server options.
+        mode:
+            name: OpenCode mode
+            description: How OpenCode is provided; managed starts OpenCode internally, external connects to an existing server.
+        host:
+            name: External OpenCode host
+            description: URL of the external OpenCode server (for example http://192.168.1.100:4096). Only used when mode is external.
+        port:
+            name: OpenCode port
+            description: Port used by OpenCode. In managed mode this is the local OpenCode server port; in external mode this is the external server port.
+        expose:
+            name: Expose OpenCode API
+            description: Bind managed OpenCode to all interfaces so external clients can connect directly to the OpenCode API port.
+        version:
+            name: OpenCode version pin
+            description: Pin OpenCode to a specific version (for example 0.6.0). Only used when mode is managed. Leave empty to install latest on startup.
+        env_vars:
+            name: OpenCode environment variables
+            description: Additional OPENCODE_ variables to export before startup, entered as KEY=value strings (for example OPENCODE_DISABLE_LSP_DOWNLOAD=true).
+        config_dir:
+            name: OpenCode config directory
+            description: Directory for OpenCode configuration files.
+        state_dir:
+            name: OpenCode state directory
+            description: Directory for OpenCode runtime state, including binary, cache, and home files.
     password:
-        name: UI password
-        description: Password to protect the OpenChamber web UI. Leave empty for no authentication.
-    opencode_version:
-        name: OpenCode version pin
-        description: Pin OpenCode to a specific version (e.g. 0.6.0). Only used when mode is managed. Leave empty to install latest on startup.
-    openchamber_version:
-        name: OpenChamber version pin
-        description: Pin OpenChamber to a specific version (e.g. 1.9.10). Leave empty to install latest on startup.
+        name: Shared password
+        description: Password for both the OpenChamber web UI and managed OpenCode server auth. OpenCode uses username opencode.
     packages:
         name: Debian Packages to Install
-        description: Additional Debian packages to be installed and made available to OpenCode.
+        description: Additional Debian packages to be installed and made available to OpenCode and OpenChamber.
     init_commands:
         name: Initialization Commands to run
-        decription: Terminal commands to run before OpenChamber is started
-    opencode_env_vars:
-        name: OpenCode environment variables
-        description: Additional OPENCODE_ variables to export before startup, entered as KEY=value strings (e.g. OPENCODE_DISABLE_LSP_DOWNLOAD=true).
+        description: Terminal commands to run before OpenChamber is started.
