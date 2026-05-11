@@ -16,7 +16,7 @@ RUN \
     \
     && apt-get install -q -y --no-install-recommends \
     bash \
-    busybox \
+    procps \
     build-essential \
     ca-certificates \
     curl \
@@ -32,10 +32,9 @@ RUN \
     nano \
     python3 \
     python3-pip \
+    sqlite \
     tar \
     vim \
-    && mkdir -p /usr/local/bin \
-    && /bin/busybox --install -s /usr/local/bin \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js 20+ (required by OpenChamber)
@@ -43,6 +42,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -q -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
+# Install UV for Python
 RUN curl -fsSL https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
 
@@ -51,7 +51,7 @@ RUN curl -L -s -o /usr/bin/ha \
     "https://github.com/home-assistant/cli/releases/download/${HA_CLI_VERSION}/ha_${BUILD_ARCH}" \
     && chmod a+x /usr/bin/ha
 
-# Install cloudflared (latest) for tunnel support
+# Install cloudflared (latest) for optional tunnel support
 RUN curl -L -s -o /usr/local/bin/cloudflared \
     "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$(echo ${BUILD_ARCH} | sed 's/aarch64/arm64/')" \
     && chmod +x /usr/local/bin/cloudflared
