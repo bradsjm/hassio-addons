@@ -88,6 +88,14 @@ install_openchamber() {
   fi
 }
 
+clear_openchamber_run_state() {
+  local run_dir="${openchamber_data_dir}/run"
+
+  rm -f \
+    "${run_dir}/openchamber-${port}.pid" \
+    "${run_dir}/openchamber-${port}.json"
+}
+
 # Read config first so paths are resolved correctly
 port=$(bashio::config 'openchamber.port')
 password=$(bashio::config 'password')
@@ -301,4 +309,5 @@ if [[ -n "${password}" && "${password}" != "null" ]]; then
 fi
 
 bashio::log.info "Starting OpenChamber server on port ${port}"
+clear_openchamber_run_state
 exec openchamber "${args[@]}"
