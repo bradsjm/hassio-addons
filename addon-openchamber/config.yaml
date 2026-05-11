@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: OpenChamber
-version: "0.2"
+version: "0.3"
 slug: openchamber
 description: OpenChamber web interface for OpenCode AI agent
 url: "https://openchamber.dev/"

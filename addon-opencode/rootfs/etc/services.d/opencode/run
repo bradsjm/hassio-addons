@@ -204,6 +204,6 @@ if ! "${binary_path}" models --refresh; then
   bashio::log.warning 'Failed to refresh models, continuing startup'
 fi
 
-cd /config
+cd "${HOME}" || bashio::exit.nok "Failed to change directory to ${HOME}"
 bashio::log.info "Starting OpenCode ${args[0]} server on port ${port}"
 "${binary_path}" "${args[@]}"

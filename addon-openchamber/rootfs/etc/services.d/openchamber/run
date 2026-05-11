@@ -18,7 +18,6 @@ declare openchamber_version
 declare openchamber_data_dir
 declare env_entry
 declare binary_path
-declare opencode_pid
 declare runtime_home
 declare runtime_cache
 declare runtime_opencode_config
@@ -87,31 +86,6 @@ install_openchamber() {
   if ! npm install -g "${package}"; then
     return 1
   fi
-}
-
-wait_for_opencode() {
-  local max_attempts=30
-  local attempt=1
-  local -a curl_args
-
-  bashio::log.info "Waiting for OpenCode server on port ${opencode_port}"
-
-  curl_args=(-s -f)
-  if [[ -n "${password}" && "${password}" != "null" ]]; then
-    curl_args+=(-u "opencode:${password}")
-  fi
-
-  while [[ ${attempt} -le ${max_attempts} ]]; do
-    if curl "${curl_args[@]}" "http://127.0.0.1:${opencode_port}/global/health" > /dev/null 2>&1; then
-      bashio::log.info "OpenCode server is ready"
-      return 0
-    fi
-    sleep 2
-    attempt=$((attempt + 1))
-  done
-
-  bashio::log.error "OpenCode server failed to start within timeout"
-  return 1
 }
 
 # Read config first so paths are resolved correctly
@@ -219,6 +193,8 @@ if bashio::config.has_value 'init_commands'; then
     done <<< "$(bashio::config 'init_commands')"
 fi
 
+cd "${HOME}" || bashio::exit.nok "Failed to change directory to ${HOME}"
+
 sshd="${HOME}/.ssh"
 ssh_private_key="${sshd}/id_ed25519"
 ssh_public_key="${ssh_private_key}.pub"
@@ -289,18 +265,9 @@ if [[ "${opencode_mode}" == "managed" ]]; then
   npx skills add homeassistant-ai/skills -g -a opencode -y
   npx skills add https://github.com/bradsjm/hassio-addons/addon-opencode/skills -g -a opencode -y
 
-  if ! "${binary_path}" models --refresh; then
-    bashio::log.warning 'Failed to refresh models, continuing startup'
-  fi
-
-  bashio::log.info "Starting OpenCode headless API server on port ${opencode_port}"
-  "${binary_path}" serve --port "${opencode_port}" --hostname "${opencode_bind}" &
-  opencode_pid=$!
-
-  if ! wait_for_opencode; then
-    kill "${opencode_pid}" 2>/dev/null || true
-    bashio::exit.nok 'OpenCode server failed to start'
-  fi
+  export OPENCODE_BINARY="${binary_path}"
+  export OPENCODE_PORT="${opencode_port}"
+  export OPENCHAMBER_OPENCODE_HOSTNAME="${opencode_bind}"
 fi
 
 if [[ -n "${openchamber_version}" ]]; then
@@ -315,12 +282,10 @@ else
   fi
 fi
 
-export OPENCODE_SKIP_START=true
-
 if [[ "${opencode_mode}" == "managed" ]]; then
-  export OPENCODE_HOST="http://127.0.0.1:${opencode_port}"
-  export OPENCODE_PORT="${opencode_port}"
+  bashio::log.info "OpenChamber will manage OpenCode on port ${opencode_port}"
 elif [[ -n "${opencode_host}" ]]; then
+  export OPENCODE_SKIP_START=true
   export OPENCODE_HOST="${opencode_host}"
   if [[ -n "${opencode_port}" && "${opencode_port}" != "null" ]]; then
     export OPENCODE_PORT="${opencode_port}"
@@ -336,6 +301,5 @@ if [[ -n "${password}" && "${password}" != "null" ]]; then
   args+=("--ui-password" "${password}")
 fi
 
-cd /config
 bashio::log.info "Starting OpenChamber server on port ${port}"
 exec openchamber "${args[@]}"

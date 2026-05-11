@@ -16,6 +16,7 @@ RUN \
     \
     && apt-get install -q -y --no-install-recommends \
     bash \
+    busybox \
     build-essential \
     ca-certificates \
     curl \
@@ -33,6 +34,8 @@ RUN \
     python3-pip \
     tar \
     vim \
+    && mkdir -p /usr/local/bin \
+    && /bin/busybox --install -s /usr/local/bin \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js 20+ (required by OpenChamber)
