@@ -32,7 +32,7 @@ RUN \
     nano \
     python3 \
     python3-pip \
-    sqlite \
+    sqlite3 \
     tar \
     vim \
     && rm -rf /var/lib/apt/lists/*
