@@ -166,12 +166,6 @@ if bashio::config.has_value 'opencode.env_vars'; then
   done <<< "$(bashio::config 'opencode.env_vars')"
 fi
 
-# Set shared password for both OpenCode server auth and OpenChamber UI
-if [[ -n "${password}" && "${password}" != "null" ]]; then
-  export OPENCODE_SERVER_USERNAME="opencode"
-  export OPENCODE_SERVER_PASSWORD="${password}"
-fi
-
 if [[ "${opencode_mode}" == "external" ]] && [[ -z "${opencode_host}" ]]; then
   bashio::exit.nok "opencode.mode is 'external' but opencode.host is empty. Set opencode.host to your OpenCode server URL."
 fi
@@ -283,10 +277,15 @@ else
 fi
 
 if [[ "${opencode_mode}" == "managed" ]]; then
+  unset OPENCODE_SERVER_USERNAME
+  unset OPENCODE_SERVER_PASSWORD
   bashio::log.info "OpenChamber will manage OpenCode on port ${opencode_port}"
 elif [[ -n "${opencode_host}" ]]; then
   export OPENCODE_SKIP_START=true
   export OPENCODE_HOST="${opencode_host}"
+  if [[ -n "${password}" && "${password}" != "null" ]]; then
+    export OPENCODE_SERVER_PASSWORD="${password}"
+  fi
   if [[ -n "${opencode_port}" && "${opencode_port}" != "null" ]]; then
     export OPENCODE_PORT="${opencode_port}"
   fi
