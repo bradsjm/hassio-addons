@@ -1,0 +1,23 @@
+configuration:
+  log_level:
+    name: Log level
+    description: MCPX application log verbosity.
+  access_log_level:
+    name: Access log level
+    description: MCPX access log verbosity.
+  auth_key:
+    name: Authentication key
+    description: Optional key required by MCPX clients when set.
+  allowed_ip_ranges:
+    name: Allowed IP ranges
+    description: Optional comma-separated runtime allowlist generated from this list.
+  cors_origins:
+    name: CORS origins
+    description: Optional browser origins allowed to access the MCPX API.
+  enable_metrics:
+    name: Enable metrics
+    description: Enable the Prometheus metrics server on port 3000. You must also map 3000/tcp in the add-on network settings.
+network:
+  9000/tcp: MCPX MCP endpoint
+  5173/tcp: MCPX Control Plane UI
+  3000/tcp: Prometheus metrics

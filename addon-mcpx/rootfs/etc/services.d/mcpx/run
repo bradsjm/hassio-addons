@@ -1,0 +1,123 @@
+#!/usr/bin/with-contenv bashio
+# ==============================================================================
+# Start the MCPX service
+# s6-overlay docs: https://github.com/just-containers/s6-overlay
+# ==============================================================================
+
+set -euo pipefail
+
+config_dir=/config/mcpx
+data_dir=/data/mcpx
+audit_log_dir=${data_dir}/audit-logs
+app_config_path=${config_dir}/app.yaml
+servers_config_path=${config_dir}/mcp.json
+
+join_config_list() {
+  local key=$1
+  local value
+  local joined=""
+
+  if ! bashio::config.has_value "${key}"; then
+    echo ""
+    return
+  fi
+
+  while IFS= read -r value; do
+    if [[ -z "${value}" || "${value}" == "null" ]]; then
+      continue
+    fi
+
+    if [[ -n "${joined}" ]]; then
+      joined="${joined},"
+    fi
+
+    joined="${joined}${value}"
+  done <<< "$(bashio::config "${key}")"
+
+  echo "${joined}"
+}
+
+log_level=$(bashio::config 'log_level')
+access_log_level=$(bashio::config 'access_log_level')
+auth_key=$(bashio::config 'auth_key')
+enable_metrics=$(bashio::config 'enable_metrics')
+allowed_ip_ranges=$(join_config_list 'allowed_ip_ranges')
+cors_origins=$(join_config_list 'cors_origins')
+auth_enabled=false
+
+if [[ -n "${auth_key}" && "${auth_key}" != "null" ]]; then
+  auth_enabled=true
+fi
+
+mkdir -p "${config_dir}" "${data_dir}" "${audit_log_dir}"
+
+if [[ ! -f "${app_config_path}" ]]; then
+  cat > "${app_config_path}" <<EOF
+permissions:
+  default:
+    _type: default-allow
+    block: []
+  consumers: {}
+  clientNames: {}
+toolGroups: []
+auth:
+  enabled: ${auth_enabled}
+toolExtensions:
+  services: {}
+targetServerAttributes: {}
+EOF
+fi
+
+if [[ "${auth_enabled}" == "true" ]]; then
+  sed -i '/^auth:$/,/^[^[:space:]]/ s/^  enabled: false$/  enabled: true/' "${app_config_path}"
+else
+  sed -i '/^auth:$/,/^[^[:space:]]/ s/^  enabled: true$/  enabled: false/' "${app_config_path}"
+fi
+
+if [[ ! -f "${servers_config_path}" ]]; then
+  cat > "${servers_config_path}" <<'EOF'
+{
+  "mcpServers": {}
+}
+EOF
+fi
+
+chown -R lunar:lunar "${config_dir}" "${data_dir}"
+
+export MCPX_PORT=9000
+export UI_PORT=5173
+export MCPX_SERVER_URL="http://127.0.0.1:9000"
+export VITE_MCPX_SERVER_PORT=9000
+export VITE_MCPX_SERVER_URL=""
+export APP_CONFIG_PATH="${app_config_path}"
+export SERVERS_CONFIG_PATH="${servers_config_path}"
+export AUDIT_LOG_DIR="${audit_log_dir}"
+export ENABLE_AUDIT_LOG=true
+export ENABLE_METRICS="${enable_metrics}"
+export SERVE_METRICS_PORT=3000
+export LOG_LEVEL="${log_level}"
+export ACCESS_LOG_LEVEL="${access_log_level}"
+export LUNAR_TELEMETRY=false
+export LUNAR_URL=""
+export LUNAR_API_KEY=""
+export DIND_ENABLED=false
+export INTERCEPTION_ENABLED=false
+
+if [[ -n "${allowed_ip_ranges}" ]]; then
+  export ALLOWED_IP_RANGES="${allowed_ip_ranges}"
+else
+  unset ALLOWED_IP_RANGES
+fi
+
+if [[ -n "${cors_origins}" ]]; then
+  export CORS_ORIGINS="${cors_origins}"
+else
+  unset CORS_ORIGINS
+fi
+
+if [[ "${auth_enabled}" == "true" ]]; then
+  export AUTH_KEY="${auth_key}"
+fi
+
+bashio::log.info "Starting MCPX on port ${MCPX_PORT} with UI on port ${UI_PORT}"
+exec /usr/local/bin/entrypoint.sh /usr/local/bin/startup.sh

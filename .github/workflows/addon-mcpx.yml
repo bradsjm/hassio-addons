@@ -1,0 +1,45 @@
+name: "Addon-MCPX"
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: "Run in test mode (skip Docker push)"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    name: "Build MCPX Add-on"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, aarch64]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+
+      - name: Build Docker image
+        if: github.event.inputs.test_mode != 'true'
+        env:
+          DOCKER_USER: ${{ secrets.DOCKERHUB_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+        run: |
+          chmod +x ./.github/scripts/build-mcpx.sh
+          ./.github/scripts/build-mcpx.sh ${{ matrix.arch }}
+
+      - name: Build Docker image (test mode)
+        if: github.event.inputs.test_mode == 'true'
+        env:
+          TEST_MODE: "true"
+        run: |
+          chmod +x ./.github/scripts/build-mcpx.sh
+          ./.github/scripts/build-mcpx.sh ${{ matrix.arch }}

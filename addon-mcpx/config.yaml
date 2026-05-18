@@ -1,0 +1,42 @@
+# https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
+name: MCPX Server
+version: "0.1"
+slug: mcpx
+description: MCPX gateway and control plane for MCP servers
+startup: application
+stage: experimental
+arch:
+  - aarch64
+  - amd64
+init: false
+ingress: false
+host_network: false
+apparmor: true
+map:
+  - config:rw
+ports:
+  9000/tcp: 9000
+  5173/tcp: 5173
+  3000/tcp: null
+ports_description:
+  9000/tcp: MCPX MCP endpoint
+  5173/tcp: MCPX Control Plane UI
+  3000/tcp: Prometheus metrics
+webui: "http://[HOST]:[PORT:5173]"
+options:
+  log_level: info
+  access_log_level: debug
+  auth_key: ""
+  allowed_ip_ranges: []
+  cors_origins: []
+  enable_metrics: false
+schema:
+  log_level: list(error|warn|info|http|verbose|debug|silly)
+  access_log_level: list(error|warn|info|http|verbose|debug|silly)
+  auth_key: password?
+  allowed_ip_ranges:
+    - str
+  cors_origins:
+    - str
+  enable_metrics: bool
+image: "bradsjm/{arch}-addon-mcpx"
