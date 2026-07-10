@@ -7,7 +7,7 @@ Use this file as the primary guide for agentic coding work here.
 
 - Add-on paths: `addon-hyperion-ng/`, `addon-opencode/`, `addon-openchamber/`
 - Core metadata: `repository.json`
-- Hyperion config: `addon-hyperion-ng/config.json`
+- Hyperion config: `addon-hyperion-ng/config.yaml`
 - Hyperion container definition: `addon-hyperion-ng/Dockerfile`
 - Hyperion runtime entrypoint: `addon-hyperion-ng/run.sh`
 - OpenCode config: `addon-opencode/config.yaml`
@@ -64,7 +64,7 @@ Examples:
 - Update add-on version from GitHub releases:
   `./.github/scripts/update-hyperion-version.sh`
 
-This script reads and updates `addon-hyperion-ng/config.json` using `jq`.
+This script reads and atomically updates the top-level version in `addon-hyperion-ng/config.yaml`.
 
 ## Code Style Guidelines
 
@@ -74,7 +74,7 @@ This script reads and updates `addon-hyperion-ng/config.json` using `jq`.
 - Prefer explicit, readable shell and Dockerfile steps over cleverness.
 - Do not introduce new tooling without a clear need.
 
-### JSON (config.json, repository.json)
+### YAML (config.yaml) and JSON (repository.json)
 
 - Use 2-space indentation.
 - Keep keys sorted only if the file already uses a stable order.
@@ -119,7 +119,7 @@ This script reads and updates `addon-hyperion-ng/config.json` using `jq`.
 
 ### Configuration & Versions
 
-- Update `addon-hyperion-ng/config.json` version when bumping Hyperion.
+- Update `addon-hyperion-ng/config.yaml` version when bumping Hyperion.
 - Ensure the release assets exist for all supported architectures.
 - Ensure the pinned Dockerfile base image supports both configured architectures.
 
@@ -155,7 +155,7 @@ This script reads and updates `addon-hyperion-ng/config.json` using `jq`.
 
 ## Multi-File Change Checklist
 
-- Update `config.json` if version changes.
+- Update `config.yaml` if version changes.
 - Verify `download-hyperion.sh` still supports all architectures.
 - Re-run the download smoke test for at least one arch.
 

@@ -1,0 +1,4 @@
+configuration:
+  admin_password:
+    name: Admin password
+    description: Optional. Replaces Hyperion's default password on initial startup; minimum 8 characters. An existing non-default password is not overwritten.

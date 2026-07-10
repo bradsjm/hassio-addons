@@ -38,7 +38,8 @@ jobs:
         name: Validate version and release assets
         run: |
           set -euo pipefail
-          version="$(jq -r '.version' addon-hyperion-ng/config.json)"
+          python3 -m pip install --user 'PyYAML==6.0.2'
+          version="$(python3 -c 'import yaml; print(yaml.safe_load(open("addon-hyperion-ng/config.yaml"))["version"])')"
           test -n "$version"
           test "$version" = "2.2.1"
           echo "version=$version" >> "$GITHUB_OUTPUT"
@@ -52,16 +53,26 @@ jobs:
 
           bash -n addon-hyperion-ng/download-hyperion.sh
           bash -n .github/scripts/update-hyperion-version.sh
+          python3 - <<'PY'
+          import yaml
+
+          with open("addon-hyperion-ng/config.yaml") as config_file:
+              config = yaml.safe_load(config_file)
+          with open("addon-hyperion-ng/translations/en.yaml") as translation_file:
+              translations = yaml.safe_load(translation_file)
+
+          assert config["arch"] == ["amd64", "aarch64"]
+          assert config["host_network"] is True
+          assert "ports" not in config
+          assert "ports_description" not in config
+          assert config["image"] == "docker.io/bradsjm/addon-hyperion-ng"
+          assert config["webui"] == "http://[HOST]:[PORT:8090]"
+          assert config["options"]["admin_password"] == ""
+          assert config["schema"]["admin_password"] == "password?"
+          assert translations["configuration"]["admin_password"]["name"]
+          assert translations["configuration"]["admin_password"]["description"]
+          PY
           python3 -m unittest discover -s addon-hyperion-ng/tests -p 'test_*.py'
-          jq empty addon-hyperion-ng/config.json
-          jq -e '
-            .arch == ["amd64", "aarch64"] and
-            .host_network == true and
-            (has("ports") | not) and
-            (has("ports_description") | not) and
-            .image == "docker.io/bradsjm/addon-hyperion-ng" and
-            .webui == "http://[HOST]:[PORT:8090]"
-          ' addon-hyperion-ng/config.json >/dev/null
 
   prepare:
     name: Prepare build matrix

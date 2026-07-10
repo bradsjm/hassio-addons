@@ -1,0 +1,35 @@
+# https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
+name: Hyperion.NG
+version: "2.2.1"
+slug: hyperionng
+description: Hyperion is an opensource Bias or Ambient Lighting implementation by the Hyperion-Project. This add-on is not supported or endorsed by the Hyperion Project and may not work with hardware capture cards or LED devices due to limitations of containers
+url: "https://hyperion-project.org/"
+arch:
+  - amd64
+  - aarch64
+startup: application
+apparmor: false
+boot: auto
+host_network: true
+map:
+  - config:rw
+image: "docker.io/bradsjm/addon-hyperion-ng"
+options:
+  admin_password: ""
+schema:
+  admin_password: password?
+privileged:
+  - SYS_ADMIN
+  - SYS_RAWIO
+uart: true
+usb: true
+video: true
+gpio: true
+devices:
+  - /dev/spidev0.0
+  - /dev/vchiq
+  - /dev/amvideo
+  - /dev/fb0
+  - /dev/mem
+webui: "http://[HOST]:[PORT:8090]"
+init: false

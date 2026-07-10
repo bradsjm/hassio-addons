@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Offline process-level checks for the Hyperion admin-password bootstrap.
 
-Run directly with ``python3 addon-hyperion-ng/tests/test_admin_password.py``.
-The suite uses a loopback TCP server and temporary command/config shims; it
-never starts Hyperion, Docker, or Home Assistant.
+Run directly with ``python3 addon-hyperion-ng/tests/test_admin_password.py``
+after installing ``PyYAML==6.0.2`` (the version installed by CI). The suite
+uses a loopback TCP server and temporary command/config shims; it never starts
+Hyperion, Docker, or Home Assistant.
 """
 
 from __future__ import annotations
@@ -18,6 +19,11 @@ import tempfile
 import threading
 import time
 import unittest
+
+try:
+    import yaml
+except ImportError as error:
+    raise RuntimeError("Install PyYAML==6.0.2 to run the Hyperion add-on tests") from error
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -196,7 +202,7 @@ source \"${TEST_RUN_COPY:?}\"
         return self.log.read_text() if self.log.exists() else ""
 
     def test_config_declares_an_optional_masked_admin_password(self) -> None:
-        config = json.loads((ADDON_DIR / "config.json").read_text())
+        config = yaml.safe_load((ADDON_DIR / "config.yaml").read_text())
 
         self.assertEqual(config["options"]["admin_password"], "")
         self.assertEqual(config["schema"]["admin_password"], "password?")

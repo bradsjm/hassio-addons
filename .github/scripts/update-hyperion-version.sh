@@ -3,17 +3,25 @@ set -euo pipefail
 
 # Default to current directory if GITHUB_WORKSPACE not set
 BASE=${GITHUB_WORKSPACE:-$(pwd)}/addon-hyperion-ng
-FILE="${BASE}/config.json"
+FILE="${BASE}/config.yaml"
 
-# Check if config.json exists
+# Check if config.yaml exists
 if [[ ! -f "$FILE" ]]; then
-    echo "ERROR: config.json not found at: $FILE" >&2
+    echo "ERROR: config.yaml not found at: $FILE" >&2
     echo "Please run from repository root or set GITHUB_WORKSPACE" >&2
     exit 1
 fi
 
-# Get current version
-CURRENT="$(jq -r ".version" "$FILE")"
+# Read the one expected top-level YAML version line.
+version_line_count=$(grep -cE '^version: "[^"]+"$' "$FILE" || true)
+if [[ "$version_line_count" -ne 1 ]]; then
+    echo "ERROR: Expected exactly one top-level version line in: $FILE" >&2
+    exit 1
+fi
+
+version_line=$(grep -E '^version: "[^"]+"$' "$FILE")
+CURRENT="${version_line#version: \"}"
+CURRENT="${CURRENT%\"}"
 echo "Current version: ${CURRENT}"
 
 # Only write to GITHUB_ENV if it exists (GitHub Actions environment)
@@ -114,7 +122,7 @@ if [[ "$CURRENT" != "$RELEASE" ]]; then
     
     # In local mode, ask for confirmation before updating
     if [[ -z "${GITHUB_ENV:-}" ]]; then
-        echo "Local mode: Would update config.json from ${CURRENT} to ${RELEASE}"
+        echo "Local mode: Would update config.yaml from ${CURRENT} to ${RELEASE}"
         read -p "Continue with update? (y/n): " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -123,15 +131,26 @@ if [[ "$CURRENT" != "$RELEASE" ]]; then
         fi
     fi
     
-    # Create temporary file for atomic update
-    temp_file=$(mktemp)
+    # Replace the validated top-level version line in an atomic update.
+    temp_file=$(mktemp "${FILE}.tmp.XXXXXX")
     
-    if jq ".version=\"${RELEASE}\"" "$FILE" > "$temp_file"; then
-        mv "$temp_file" "$FILE"
-        echo "Version updated successfully"
+    if while IFS= read -r line || [[ -n "$line" ]]; do
+        if [[ "$line" == "$version_line" ]]; then
+            printf 'version: "%s"\n' "$RELEASE"
+        else
+            printf '%s\n' "$line"
+        fi
+    done < "$FILE" > "$temp_file"; then
+        if mv "$temp_file" "$FILE"; then
+            echo "Version updated successfully"
+        else
+            rm -f "$temp_file"
+            echo "ERROR: Failed to update version in config.yaml" >&2
+            exit 1
+        fi
     else
         rm -f "$temp_file"
-        echo "ERROR: Failed to update version in config.json" >&2
+        echo "ERROR: Failed to update version in config.yaml" >&2
         exit 1
     fi
 else
