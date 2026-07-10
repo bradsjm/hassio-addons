@@ -8,13 +8,22 @@
 
 [![GitHub Activity][commits-shield]][commits]
 
-_A collection of Home Assistant add-ons for Hyperion.NG, OpenCode, and OpenChamber._
+_A collection of Home Assistant add-ons for Hyperion.NG, OpenCode, OpenChamber, and MCPX._
 
 ## About
 
-This repository provides Home Assistant add-ons that extend your smart home with ambient lighting, AI coding assistance, and rich web interfaces.
+This repository provides Home Assistant add-ons that extend your smart home with ambient lighting, AI coding assistance, rich web interfaces, and MCP server control.
 
 ## Add-ons provided by this repository
+
+### [MCPX Server][addon-mcpx]
+
+![Supports aarch64 Architecture][aarch64-shield]
+![Supports amd64 Architecture][amd64-shield]
+
+MCP gateway and browser control plane for MCP servers, including optional direct host Docker API support for trusted server definitions.
+
+[:books: MCPX documentation][doc-mcpx]
 
 ### [OpenChamber][addon-openchamber]
 
@@ -68,12 +77,14 @@ Copyright (c) 2021-2026 Jonathan Bradshaw
 
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [addon-hyperion]: https://github.com/bradsjm/hassio-addons/tree/main/addon-hyperion-ng
+[addon-mcpx]: https://github.com/bradsjm/hassio-addons/tree/main/addon-mcpx
 [addon-opencode]: https://github.com/bradsjm/hassio-addons/tree/main/addon-opencode
 [addon-openchamber]: https://github.com/bradsjm/hassio-addons/tree/main/addon-openchamber
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [commits-shield]: https://img.shields.io/github/commit-activity/m/bradsjm/hassio-addons.svg
 [commits]: https://github.com/bradsjm/hassio-addons/commits/main
 [doc-hyperion]: https://github.com/bradsjm/hassio-addons/blob/main/addon-hyperion-ng/README.md
+[doc-mcpx]: https://github.com/bradsjm/hassio-addons/blob/main/addon-mcpx/DOCS.md
 [doc-opencode]: https://github.com/bradsjm/hassio-addons/blob/main/addon-opencode/DOCS.md
 [doc-openchamber]: https://github.com/bradsjm/hassio-addons/blob/main/addon-openchamber/DOCS.md
 [issue]: https://github.com/bradsjm/hassio-addons/issues

@@ -1,17 +1,20 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
-ARG BUILD_FROM=ghcr.io/hassio-addons/base:stable
-ARG MCPX_REF=main
+ARG BUILD_FROM=ghcr.io/home-assistant/base:latest
+ARG MCPX_REF=e4a70047221fa015973d78858b7bdfd7ca321b32
 
 FROM node:22.22.0-alpine3.22 AS upstream-source
 ARG MCPX_REF
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-RUN apk add --no-cache ca-certificates curl tar
+RUN apk add --no-cache ca-certificates curl patch tar
 
 WORKDIR /src
 RUN curl -fsSL "https://github.com/TheLunarCompany/lunar/archive/${MCPX_REF}.tar.gz" \
     | tar -xz --strip-components=1
+
+COPY patches/lunar-e4a70047221fa015973d78858b7bdfd7ca321b32.patch /tmp/
+RUN patch --batch --forward -p1 < /tmp/lunar-e4a70047221fa015973d78858b7bdfd7ca321b32.patch
 
 FROM node:22.22.0-alpine3.22 AS base
 
@@ -26,46 +29,6 @@ COPY --from=upstream-source /src/mcpx/scripts/generate-config.sh ./scripts/gener
 COPY --from=upstream-source /src/mcpx/deps.json ./deps.json
 COPY --from=upstream-source /src/mcpx/build-deps.cjs ./build-deps.cjs
 COPY --from=upstream-source /src/mcpx/.version ./.version
-COPY --from=upstream-source /src/mcpx/rootfs ./rootfs
-
-RUN node <<'EOF'
-const fs = require("fs");
-
-function replaceOnce(path, from, to) {
-  const source = fs.readFileSync(path, "utf8");
-  if (!source.includes(from)) {
-    throw new Error(`Expected block not found in ${path}`);
-  }
-  fs.writeFileSync(path, source.replace(from, to));
-}
-
-replaceOnce(
-  "packages/mcpx-server/src/server/build-server.ts",
-  "  const corsOrigin = env.CORS_ORIGINS || [\n    `http://localhost:${env.UI_PORT}`,\n    `http://127.0.0.1:${env.UI_PORT}`,\n  ];",
-  "  const corsOrigin = env.CORS_ORIGINS || true;",
-);
-
-replaceOnce(
-  "packages/ui/src/config/runtime-config.ts",
-  "\n      if (\n        !config.VITE_MCPX_SERVER_URL ||\n        config.VITE_MCPX_SERVER_URL.trim() === \"\"\n      ) {\n        throw new Error(\n          \"VITE_MCPX_SERVER_URL is required in config.json and cannot be empty\",\n        );\n      }\n",
-  "\n",
-);
-
-replaceOnce(
-  "packages/ui/src/data/axios-client.ts",
-  "  config.withCredentials = isEnterpriseEnabled();\n  return config;",
-  "  const authKey = window.localStorage.getItem(\"mcpx-auth-key\");\n  if (authKey) {\n    config.headers.set(\"x-lunar-api-key\", authKey);\n  }\n\n  config.withCredentials = isEnterpriseEnabled();\n  return config;",
-);
-
-fs.appendFileSync(
-  "packages/ui/src/data/axios-client.ts",
-  `\n\naxiosClient.interceptors.response.use(\n  (response) => response,\n  async (error) => {\n    const config = error.config;\n    const isMissingKey = error.response?.status === 401;\n    const isInvalidKey =\n      error.response?.status === 403 &&\n      typeof error.response.data === \"string\" &&\n      error.response.data.includes(\"Invalid API key\");\n\n    if ((isMissingKey || isInvalidKey) && config && !(config as any)._mcpxAuthRetried) {\n      if (isInvalidKey) {\n        window.localStorage.removeItem(\"mcpx-auth-key\");\n      }\n\n      const authKey = window.prompt(\"MCPX auth key\");\n      if (authKey) {\n        window.localStorage.setItem(\"mcpx-auth-key\", authKey);\n        (config as any)._mcpxAuthRetried = true;\n        config.headers.set(\"x-lunar-api-key\", authKey);\n        return axiosClient.request(config);\n      }\n    }\n\n    return Promise.reject(error);\n  },\n);\n`,
-);
-EOF
-
-RUN chmod +x ./rootfs/usr/local/bin/entrypoint.sh \
-    && chmod +x ./rootfs/usr/local/bin/startup.sh
-
 RUN VERSION_VALUE=$(tr -d '\n' < .version) \
     && echo "${VERSION_VALUE}" > /tmp/version.env
 
@@ -148,6 +111,7 @@ RUN apk add --no-cache \
     ca-certificates \
     cargo \
     curl \
+    docker-cli \
     gcc \
     ipset \
     iptables \
@@ -198,13 +162,9 @@ COPY --from=base --chown=${LUNAR_USER}:${SHARED_GROUP_NAME} ${HOME}/packages/mcp
 COPY --from=base --chown=${LUNAR_USER}:${SHARED_GROUP_NAME} ${HOME}/node_modules node_modules
 COPY --from=base --chown=${LUNAR_USER}:${SHARED_GROUP_NAME} ${HOME}/scripts/generate-config.sh /usr/local/bin/generate-config.sh
 COPY --from=base --chown=${LUNAR_USER}:${SHARED_GROUP_NAME} ${HOME}/packages/ui/dist packages/ui
-COPY --from=base ${HOME}/rootfs /
-
 COPY rootfs /
 
-RUN chmod +x /usr/local/bin/entrypoint.sh \
-    && chmod +x /usr/local/bin/startup.sh \
-    && chmod +x /etc/services.d/mcpx/run \
+RUN chmod +x /etc/services.d/mcpx/run \
     && chmod +x /etc/services.d/mcpx/finish
 
 EXPOSE 9000 5173 3000
@@ -213,24 +173,24 @@ HEALTHCHECK --start-period=2m \
     CMD curl --fail http://127.0.0.1:9000/healthcheck || exit 1
 
 # Build arguments
-ARG BUILD_ARCH
+ARG BUILD_ARCH=amd64
 ARG BUILD_DATE
-ARG BUILD_DESCRIPTION
-ARG BUILD_NAME
+ARG BUILD_DESCRIPTION="MCPX gateway and control plane add-on."
+ARG BUILD_NAME="MCPX Server"
 ARG BUILD_REF
-ARG BUILD_REPOSITORY
-ARG BUILD_VERSION
+ARG BUILD_REPOSITORY="bradsjm/hassio-addons"
+ARG BUILD_VERSION=0.2.0
 
 # Labels
 LABEL \
-    io.hass.name="${BUILD_NAME}" \
-    io.hass.description="${BUILD_DESCRIPTION}" \
+    io.hass.name="MCPX Server" \
+    io.hass.description="MCPX gateway and control plane add-on." \
     io.hass.arch="${BUILD_ARCH}" \
-    io.hass.type="addon" \
+    io.hass.type="app" \
     io.hass.version=${BUILD_VERSION} \
     maintainer="Jonathan Bradshaw <jb@nrgup.net>" \
-    org.opencontainers.image.title="${BUILD_NAME}" \
-    org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
+    org.opencontainers.image.title="MCPX Server" \
+    org.opencontainers.image.description="MCPX gateway and control plane add-on." \
     org.opencontainers.image.vendor="Home Assistant Community Apps" \
     org.opencontainers.image.authors="Jonathan Bradshaw <jb@nrgup.net>" \
     org.opencontainers.image.licenses="MIT" \

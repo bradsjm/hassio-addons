@@ -6,8 +6,8 @@
 
 set -euo pipefail
 
-config_dir=/config/mcpx
-data_dir=/data/mcpx
+config_dir=/config
+data_dir=/data
 audit_log_dir=${data_dir}/audit-logs
 app_config_path=${config_dir}/app.yaml
 servers_config_path=${config_dir}/mcp.json
@@ -41,6 +41,7 @@ log_level=$(bashio::config 'log_level')
 access_log_level=$(bashio::config 'access_log_level')
 auth_key=$(bashio::config 'auth_key')
 enable_metrics=$(bashio::config 'enable_metrics')
+enable_docker_mcp=$(bashio::config 'enable_docker_mcp')
 allowed_ip_ranges=$(join_config_list 'allowed_ip_ranges')
 cors_origins=$(join_config_list 'cors_origins')
 auth_enabled=false
@@ -62,6 +63,7 @@ permissions:
 toolGroups: []
 auth:
   enabled: ${auth_enabled}
+  header: x-lunar-api-key
 toolExtensions:
   services: {}
 targetServerAttributes: {}
@@ -74,6 +76,12 @@ else
   sed -i '/^auth:$/,/^[^[:space:]]/ s/^  enabled: true$/  enabled: false/' "${app_config_path}"
 fi
 
+if sed -n '/^auth:$/,/^[^[:space:]]/p' "${app_config_path}" | grep -q '^  header:'; then
+  sed -i '/^auth:$/,/^[^[:space:]]/ s/^  header:.*$/  header: x-lunar-api-key/' "${app_config_path}"
+else
+  sed -i '/^auth:$/a\  header: x-lunar-api-key' "${app_config_path}"
+fi
+
 if [[ ! -f "${servers_config_path}" ]]; then
   cat > "${servers_config_path}" <<'EOF'
 {
@@ -82,7 +90,8 @@ if [[ ! -f "${servers_config_path}" ]]; then
 EOF
 fi
 
-chown -R lunar:lunar "${config_dir}" "${data_dir}"
+chown lunar:lunar "${config_dir}" "${data_dir}" "${audit_log_dir}"
+chown lunar:lunar "${app_config_path}" "${servers_config_path}"
 
 export MCPX_PORT=9000
 export UI_PORT=5173
@@ -102,6 +111,9 @@ export LUNAR_URL=""
 export LUNAR_API_KEY=""
 export DIND_ENABLED=false
 export INTERCEPTION_ENABLED=false
+export ENABLE_STDIO_MCP_SERVERS=true
+export VERSION="$(tr -d '\n' < /tmp/version.env)"
+export INSTANCE_ID="mcpx-$(hexdump -n 6 -v -e '/1 "%02x"' /dev/urandom | head -c 12)"
 
 if [[ -n "${allowed_ip_ranges}" ]]; then
   export ALLOWED_IP_RANGES="${allowed_ip_ranges}"
@@ -117,7 +129,52 @@ fi
 
 if [[ "${auth_enabled}" == "true" ]]; then
   export AUTH_KEY="${auth_key}"
+else
+  unset AUTH_KEY
+fi
+
+if [[ "${enable_docker_mcp}" == "true" ]]; then
+  docker_socket=/var/run/docker.sock
+  if [[ ! -S "${docker_socket}" ]]; then
+    bashio::log.error "Docker MCP support requires the Home Assistant Docker API. Disable Protection Mode and restart, or set enable_docker_mcp to false."
+    exit 1
+  fi
+
+  docker_gid=$(stat -c '%g' "${docker_socket}")
+  docker_group=$(awk -F: -v gid="${docker_gid}" '$3 == gid { print $1; exit }' /etc/group)
+  if [[ -z "${docker_group}" ]]; then
+    docker_group=docker-host
+    addgroup -g "${docker_gid}" -S "${docker_group}"
+  fi
+  addgroup lunar "${docker_group}" 2>/dev/null || true
+
+  if ! su-exec lunar docker version >/dev/null 2>&1; then
+    bashio::log.error "Docker MCP support cannot access the Home Assistant Docker API as lunar. Disable Protection Mode and restart, or set enable_docker_mcp to false."
+    exit 1
+  fi
+
+  export DIND_ENABLED=true
 fi
 
 bashio::log.info "Starting MCPX on port ${MCPX_PORT} with UI on port ${UI_PORT}"
-exec /usr/local/bin/entrypoint.sh /usr/local/bin/startup.sh
+su-exec lunar /usr/local/bin/generate-config.sh
+cd "${data_dir}"
+su-exec lunar serve /lunar/packages/ui -s -p "${UI_PORT}" &
+ui_pid=$!
+su-exec lunar node /lunar/packages/mcpx-server/dist/index.js &
+server_pid=$!
+
+cleanup() {
+  kill "${ui_pid}" "${server_pid}" 2>/dev/null || true
+  wait "${ui_pid}" 2>/dev/null || true
+  wait "${server_pid}" 2>/dev/null || true
+}
+
+trap 'cleanup; exit 130' INT
+trap 'cleanup; exit 143' TERM
+
+server_exit=0
+wait "${server_pid}" || server_exit=$?
+kill "${ui_pid}" 2>/dev/null || true
+wait "${ui_pid}" 2>/dev/null || true
+exit "${server_exit}"

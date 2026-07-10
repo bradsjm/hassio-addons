@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: MCPX Server
-version: "0.1"
+version: "0.2.0"
 slug: mcpx
 description: MCPX gateway and control plane for MCP servers
 startup: application
@@ -13,7 +13,10 @@ ingress: false
 host_network: false
 apparmor: true
 map:
-  - config:rw
+  - type: addon_config
+    read_only: false
+    path: /config
+docker_api: true
 ports:
   9000/tcp: 9000
   5173/tcp: 5173
@@ -30,6 +33,7 @@ options:
   allowed_ip_ranges: []
   cors_origins: []
   enable_metrics: false
+  enable_docker_mcp: false
 schema:
   log_level: list(error|warn|info|http|verbose|debug|silly)
   access_log_level: list(error|warn|info|http|verbose|debug|silly)
@@ -39,4 +43,5 @@ schema:
   cors_origins:
     - str
   enable_metrics: bool
-image: "bradsjm/{arch}-addon-mcpx"
+  enable_docker_mcp: bool
+image: "docker.io/bradsjm/addon-mcpx"

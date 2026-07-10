@@ -1,45 +1,91 @@
-name: "Addon-MCPX"
+name: Addon-MCPX
 
 on:
+  pull_request:
+    paths:
+      - addon-mcpx/**
+      - .github/workflows/addon-mcpx.yml
+  push:
+    branches:
+      - main
+    paths:
+      - addon-mcpx/**
+      - .github/workflows/addon-mcpx.yml
   workflow_dispatch:
-    inputs:
-      test_mode:
-        description: "Run in test mode (skip Docker push)"
-        required: false
-        default: false
-        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  ARCHITECTURES: '["amd64", "aarch64"]'
+  IMAGE_NAME: addon-mcpx
+  REGISTRY_PREFIX: docker.io/bradsjm
+  VERSION: 0.2.0
 
 jobs:
-  build:
-    name: "Build MCPX Add-on"
+  prepare:
+    name: Prepare build matrix
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [amd64, aarch64]
-      fail-fast: false
-
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+      - id: matrix
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.06.0
+        with:
+          architectures: ${{ env.ARCHITECTURES }}
+          image-name: ${{ env.IMAGE_NAME }}
+          registry-prefix: ${{ env.REGISTRY_PREFIX }}
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y curl
+  build:
+    name: Build ${{ matrix.arch }}
+    needs:
+      - prepare
+      - validation
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: home-assistant/builder/actions/build-image@2026.06.0
+        with:
+          arch: ${{ matrix.arch }}
+          context: addon-mcpx
+          image: ${{ matrix.image }}
+          image-tags: ${{ env.VERSION }}
+          version: ${{ env.VERSION }}
+          labels: |
+            io.hass.type=app
+            io.hass.name=MCPX Server
+            io.hass.description=MCPX gateway and control plane add-on.
+          container-registry: docker.io
+          container-registry-username: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.DOCKERHUB_USER) || 'unused' }}
+          container-registry-password: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.DOCKERHUB_PASSWORD) || 'unused' }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
-      - name: Build Docker image
-        if: github.event.inputs.test_mode != 'true'
-        env:
-          DOCKER_USER: ${{ secrets.DOCKERHUB_USER }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-        run: |
-          chmod +x ./.github/scripts/build-mcpx.sh
-          ./.github/scripts/build-mcpx.sh ${{ matrix.arch }}
+  publish:
+    name: Publish multi-architecture manifest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.06.0
+        with:
+          architectures: ${{ env.ARCHITECTURES }}
+          image-name: ${{ env.IMAGE_NAME }}
+          image-tags: ${{ env.VERSION }}
+          registry-prefix: ${{ env.REGISTRY_PREFIX }}
+          container-registry: docker.io
+          container-registry-username: ${{ secrets.DOCKERHUB_USER }}
+          container-registry-password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build Docker image (test mode)
-        if: github.event.inputs.test_mode == 'true'
-        env:
-          TEST_MODE: "true"
+  validation:
+    name: Validate MCPX contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run static and runtime tests
         run: |
-          chmod +x ./.github/scripts/build-mcpx.sh
-          ./.github/scripts/build-mcpx.sh ${{ matrix.arch }}
+          addon-mcpx/tests/verify.sh
+          python3 addon-mcpx/tests/test_runtime.py

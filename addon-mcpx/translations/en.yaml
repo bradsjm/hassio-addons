@@ -13,10 +13,13 @@ configuration:
     description: Optional comma-separated runtime allowlist generated from this list.
   cors_origins:
     name: CORS origins
-    description: Optional browser origins allowed to access the MCPX API.
+    description: Optional browser origins allowed to access MCPX REST and Socket.IO. Empty reflects the requesting origin.
   enable_metrics:
     name: Enable metrics
     description: Enable the Prometheus metrics server on port 3000. You must also map 3000/tcp in the add-on network settings.
+  enable_docker_mcp:
+    name: Enable Docker MCP servers
+    description: Allow trusted MCP servers to use the host Docker API. Requires Protection Mode to be disabled and grants host-root-equivalent Docker control.
 network:
   9000/tcp: MCPX MCP endpoint
   5173/tcp: MCPX Control Plane UI

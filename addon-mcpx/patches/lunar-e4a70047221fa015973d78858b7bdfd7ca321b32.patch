@@ -1,0 +1,261 @@
+diff --git a/mcpx/packages/mcpx-server/src/server/build-server.ts b/mcpx/packages/mcpx-server/src/server/build-server.ts
+index c0991bcc..65c56612 100644
+--- a/mcpx/packages/mcpx-server/src/server/build-server.ts
++++ b/mcpx/packages/mcpx-server/src/server/build-server.ts
+@@ -33,12 +33,9 @@ export async function buildMcpxServer(
+   const app = express();
+   const server = createServer(app);
+ 
+-  // Configure CORS for UI requests
+-  // Default to localhost:5173 (UI dev server) if CORS_ORIGINS is not set
+-  const corsOrigin = env.CORS_ORIGINS || [
+-    `http://localhost:${env.UI_PORT}`,
+-    `http://127.0.0.1:${env.UI_PORT}`,
+-  ];
++  // Reflect browser origins when no explicit allowlist is configured. This
++  // avoids the invalid wildcard-plus-credentials CORS combination.
++  const corsOrigin = env.CORS_ORIGINS || true;
+   app.use(
+     cors({
+       origin: corsOrigin,
+@@ -47,6 +44,7 @@ export async function buildMcpxServer(
+       allowedHeaders: [
+         "Content-Type",
+         "Authorization",
++        "x-lunar-api-key",
+         "X-API-Key",
+         "Mcp-Session-Id",
+         "MCP-Protocol-Version",
+@@ -148,7 +146,13 @@ export async function buildMcpxServer(
+   );
+ 
+   // Bind UI websocket
+-  bindUIWebsocket(server, services, logger.child({ component: "ws-ui" }));
++  bindUIWebsocket(
++    server,
++    services,
++    config,
++    allowedIpARanged,
++    logger.child({ component: "ws-ui" }),
++  );
+ 
+   return server;
+ }
+diff --git a/mcpx/packages/mcpx-server/src/server/ws-ui.ts b/mcpx/packages/mcpx-server/src/server/ws-ui.ts
+index 49965916..7b5777f0 100644
+--- a/mcpx/packages/mcpx-server/src/server/ws-ui.ts
++++ b/mcpx/packages/mcpx-server/src/server/ws-ui.ts
+@@ -1,3 +1,7 @@
++import {
++  ipAllowed,
++  type CompiledRange,
++} from "@mcpx/toolkit-core/ip-access";
+ import {
+   UI_ClientBoundMessage,
+   UI_ServerBoundMessage,
+@@ -14,7 +18,7 @@ import { toClientIdentity } from "../services/identity-service.js";
+ import { loggableError } from "@mcpx/toolkit-core/logging";
+ import { env } from "../env.js";
+ import { checkHubConnection } from "./hub-connection-guard.js";
+-import { ConfigSnapshot } from "../config.js";
++import { ConfigService, ConfigSnapshot } from "../config.js";
+ import { stringify } from "yaml";
+ import z from "zod/v4";
+ import { updateTargetServerPayloadSchema } from "../model/target-servers.js";
+@@ -22,18 +26,36 @@ import { updateTargetServerPayloadSchema } from "../model/target-servers.js";
+ export function bindUIWebsocket(
+   server: HTTPServer,
+   services: Services,
++  configService: ConfigService,
++  allowedIpRanges: CompiledRange[] | undefined,
+   logger: Logger,
+ ): void {
+   const io = new WSServer(server, {
+     path: "/ws-ui",
+     cors: {
+-      origin: env.CORS_ORIGINS || "*",
++      origin: env.CORS_ORIGINS || true,
+       credentials: true,
++      allowedHeaders: ["content-type", "x-lunar-api-key"],
+     },
+   });
+ 
++  // Socket.IO bypasses Express middleware, so enforce the same IP and API-key checks here.
+   // Middleware to check hub connection before allowing websocket connections
+   io.use((socket, next) => {
++    const ip = socket.handshake.address;
++    if (allowedIpRanges !== undefined && (!ip || !ipAllowed(ip, allowedIpRanges))) {
++      return next(new Error("Forbidden: IP not allowed"));
++    }
++
++    const authConfig = configService.getConfig().auth;
++    if (authConfig?.enabled && env.AUTH_KEY) {
++      const headerName = (authConfig.header ?? "x-lunar-api-key").toLowerCase();
++      const supplied = socket.handshake.auth?.[headerName] ?? socket.handshake.headers[headerName];
++      if (supplied !== env.AUTH_KEY) {
++        return next(new Error(supplied ? "Forbidden: Invalid API key" : "Unauthorized: API key required"));
++      }
++    }
++
+     const connectionCheck = checkHubConnection(
+       services.hubService,
+       env.ENFORCE_HUB_CONNECTION,
+diff --git a/mcpx/packages/ui/src/config/runtime-config.ts b/mcpx/packages/ui/src/config/runtime-config.ts
+index d0f4791e..2d7517c8 100644
+--- a/mcpx/packages/ui/src/config/runtime-config.ts
++++ b/mcpx/packages/ui/src/config/runtime-config.ts
+@@ -39,16 +39,6 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
+       }
+ 
+       const config = await res.json();
+-      // Validate required fields - check for empty string as well
+-      if (
+-        !config.VITE_MCPX_SERVER_URL ||
+-        config.VITE_MCPX_SERVER_URL.trim() === ""
+-      ) {
+-        throw new Error(
+-          "VITE_MCPX_SERVER_URL is required in config.json and cannot be empty",
+-        );
+-      }
+-
+       cachedConfig = {
+         ...config,
+         VITE_AUTH_BFF_URL: config.VITE_AUTH_BFF_URL || "",
+diff --git a/mcpx/packages/ui/src/data/auth-key.ts b/mcpx/packages/ui/src/data/auth-key.ts
+new file mode 100644
+index 00000000..aa34b72d
+--- /dev/null
++++ b/mcpx/packages/ui/src/data/auth-key.ts
+@@ -0,0 +1,19 @@
++const STORAGE_KEY = "mcpx-auth-key";
++
++export function getStoredAuthKey(): string | null {
++  return window.localStorage.getItem(STORAGE_KEY);
++}
++
++export function forgetStoredAuthKey(): void {
++  window.localStorage.removeItem(STORAGE_KEY);
++}
++
++export function promptForAuthKey(): string | null {
++  const authKey = window.prompt("MCPX auth key");
++  if (!authKey) {
++    return null;
++  }
++
++  window.localStorage.setItem(STORAGE_KEY, authKey);
++  return authKey;
++}
+diff --git a/mcpx/packages/ui/src/data/axios-client.ts b/mcpx/packages/ui/src/data/axios-client.ts
+index 27f44d0e..e9c951d0 100644
+--- a/mcpx/packages/ui/src/data/axios-client.ts
++++ b/mcpx/packages/ui/src/data/axios-client.ts
+@@ -1,6 +1,11 @@
+ import axios from "axios";
+ import { getMcpxServerURL } from "../config/api-config";
+ import { isEnterpriseEnabled } from "@/config/runtime-config";
++import {
++  forgetStoredAuthKey,
++  getStoredAuthKey,
++  promptForAuthKey,
++} from "./auth-key";
+ 
+ const API_SERVER_URL = getMcpxServerURL("http");
+ 
+@@ -12,7 +17,41 @@ export const axiosClient = axios.create({
+ });
+ 
+ axiosClient.interceptors.request.use((config) => {
++  const authKey = getStoredAuthKey();
++  if (authKey) {
++    config.headers.set("x-lunar-api-key", authKey);
++  }
+   // Re-evaluate enterprise flag for every request so runtime config changes apply
+   config.withCredentials = isEnterpriseEnabled();
+   return config;
+ });
++
++axiosClient.interceptors.response.use(
++  (response) => response,
++  async (error) => {
++    const config = error.config;
++    const isMissingKey = error.response?.status === 401;
++    const isInvalidKey =
++      error.response?.status === 403 &&
++      typeof error.response.data === "string" &&
++      error.response.data.includes("Invalid API key");
++
++    if (
++      (isMissingKey || isInvalidKey) &&
++      config &&
++      !(config as { _mcpxAuthRetried?: boolean })._mcpxAuthRetried
++    ) {
++      if (isInvalidKey) {
++        forgetStoredAuthKey();
++      }
++      const authKey = promptForAuthKey();
++      if (authKey) {
++        (config as { _mcpxAuthRetried?: boolean })._mcpxAuthRetried = true;
++        config.headers.set("x-lunar-api-key", authKey);
++        return axiosClient.request(config);
++      }
++    }
++
++    return Promise.reject(error);
++  },
++);
+diff --git a/mcpx/packages/ui/src/store/socket.ts b/mcpx/packages/ui/src/store/socket.ts
+index 2209d6b3..636de082 100644
+--- a/mcpx/packages/ui/src/store/socket.ts
++++ b/mcpx/packages/ui/src/store/socket.ts
+@@ -17,6 +17,11 @@ import { getMcpxServerURL } from "../config/api-config";
+ import { isEnterpriseEnabled } from "@/config/runtime-config";
+ import { createDevtoolsOptions } from "./devtools";
+ import { debounce } from "../utils";
++import {
++  forgetStoredAuthKey,
++  getStoredAuthKey,
++  promptForAuthKey,
++} from "../data/auth-key";
+ 
+ export type SocketStore = {
+   // Socket State
+@@ -45,6 +50,7 @@ export const socketStore = create<SocketStore>()(
+       let listenersBound = false;
+       let pendingAppConfig = true;
+       let pendingSystemState = true;
++      let authRetryAttempted = false;
+ 
+       const systemStateUpdate = (newState: SystemState) => {
+         const clonedState = structuredClone(newState);
+@@ -162,7 +168,7 @@ export const socketStore = create<SocketStore>()(
+ 
+         const url = getMcpxServerURL("ws");
+         socket = io(url, {
+-          auth: { token },
++          auth: { token, "x-lunar-api-key": getStoredAuthKey() || "" },
+           path: "/ws-ui",
+           transports: ["polling", "websocket"],
+           upgrade: true,
+@@ -184,6 +190,21 @@ export const socketStore = create<SocketStore>()(
+ 
+         socket.on("connect_error", (error) => {
+           console.error("WebSocket connection error:", error);
++          const isAuthError =
++            error.message === "Unauthorized: API key required" ||
++            error.message === "Forbidden: Invalid API key";
++          if (isAuthError && !authRetryAttempted) {
++            authRetryAttempted = true;
++            if (error.message === "Forbidden: Invalid API key") {
++              forgetStoredAuthKey();
++            }
++            const authKey = promptForAuthKey();
++            if (authKey) {
++              socket!.auth = { token, "x-lunar-api-key": authKey };
++              socket!.connect();
++              return;
++            }
++          }
+           if (error.message === WS_CONNECTION_ERROR.HUB_NOT_CONNECTED) {
+             set({
+               connectionRejectedHubRequired: true,
