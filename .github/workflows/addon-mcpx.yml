@@ -7,7 +7,7 @@ on:
       - .github/workflows/addon-mcpx.yml
   push:
     branches:
-      - main
+      - master
     paths:
       - addon-mcpx/**
       - .github/workflows/addon-mcpx.yml
@@ -60,14 +60,14 @@ jobs:
             io.hass.name=MCPX Server
             io.hass.description=MCPX gateway and control plane add-on.
           container-registry: docker.io
-          container-registry-username: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.DOCKERHUB_USER) || 'unused' }}
-          container-registry-password: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.DOCKERHUB_PASSWORD) || 'unused' }}
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          container-registry-username: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master' && secrets.DOCKERHUB_USER) || 'unused' }}
+          container-registry-password: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master' && secrets.DOCKERHUB_PASSWORD) || 'unused' }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
 
   publish:
     name: Publish multi-architecture manifest
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.06.0

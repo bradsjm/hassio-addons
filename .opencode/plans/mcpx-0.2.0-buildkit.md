@@ -11,7 +11,7 @@ Deliver the experimental MCPX Home Assistant add-on as version 0.2.0 with a pinn
 - `ENABLE_STDIO_MCP_SERVERS=true` is always exported. `VERSION` and `INSTANCE_ID` are initialized in the add-on service, which intentionally does not invoke Lunar's Docker-in-Docker entrypoint. The service starts UI and server as `lunar`, waits for the server, and always stops and reaps the UI.
 - `enable_docker_mcp` defaults to false. When enabled, the service validates the Supervisor-provided host Docker socket and `docker version` as `lunar`, dynamically grants the socket group where needed, and sets `DIND_ENABLED=true`. It otherwise sets `DIND_ENABLED=false`. The image installs `docker-cli` only.
 - The tracked Lunar patch is applied with `patch --batch --forward`; it fails on source drift. It allows the `x-lunar-api-key` REST header, reflects origins when no explicit CORS list is configured (never wildcard plus credentials), supplies/retries browser credentials, enforces the same Socket.IO handshake key, enforces socket IP ranges, and permits an empty relative UI server URL.
-- The image is published as `docker.io/bradsjm/addon-mcpx`. The MCPX workflow uses Home Assistant builder actions `2026.06.0`; PR, manual, and non-main-push runs build without logging in or publishing, while main pushes use the existing Docker Hub credentials to publish per-architecture images and their manifest.
+- The image is published as `docker.io/bradsjm/addon-mcpx`. The MCPX workflow uses Home Assistant builder actions `2026.06.0`; PR, manual, and non-master-push runs build without logging in or publishing, while master pushes use the existing Docker Hub credentials to publish per-architecture images and their manifest.
 
 ## Exact changed files
 
