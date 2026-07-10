@@ -8,8 +8,8 @@ set -euo pipefail
 
 usage() {
     echo "Usage: $0 <version> <build_arch> <output_dir>"
-    echo "  version:    Hyperion version (e.g., 2.1.1)"
-    echo "  build_arch: Home Assistant architecture (amd64, armhf, aarch64)"
+    echo "  version:    Hyperion version (e.g., 2.2.1)"
+    echo "  build_arch: Home Assistant architecture (amd64, aarch64)"
     echo "  output_dir: Directory to extract to"
     exit 1
 }
@@ -22,12 +22,11 @@ log() {
 map_architecture() {
     local build_arch="$1"
     case "$build_arch" in
-        amd64) echo "x86_64" ;;
-        armhf) echo "armv7l" ;;
+        amd64) echo "amd64" ;;
         aarch64) echo "arm64" ;;
         *) 
             log "ERROR: Unsupported architecture: $build_arch"
-            log "Supported: amd64, armhf, aarch64"
+            log "Supported: amd64, aarch64"
             exit 1
             ;;
     esac

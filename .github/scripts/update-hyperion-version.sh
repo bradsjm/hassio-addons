@@ -67,26 +67,28 @@ get_latest_release() {
 # Function to validate release exists and has required assets
 validate_release() {
     local release="$1"
-    local required_archs=("x86_64" "armv7l" "arm64")
+    local required_archs=("amd64" "arm64")
     local base_url="https://github.com/hyperion-project/hyperion.ng/releases/download/${release}"
     
     echo "Validating release ${release} has required assets..." >&2
     
+    if ! command -v curl >/dev/null 2>&1; then
+        echo "ERROR: curl is required to validate release assets" >&2
+        return 1
+    fi
+
     for arch in "${required_archs[@]}"; do
         local asset_url="${base_url}/Hyperion-${release}-Linux-${arch}.tar.gz"
         echo "Checking: ${asset_url}" >&2
         
-        if command -v curl >/dev/null 2>&1; then
-            if ! curl -s --head --fail --connect-timeout 10 --max-time 15 "$asset_url" >/dev/null 2>&1; then
-                echo "WARNING: Asset not found for ${arch}: ${asset_url}" >&2
-                # Don't fail here, just warn - some releases might not have all architectures
-            else
-                echo "✓ Asset found for ${arch}" >&2
-            fi
+        if ! curl --silent --show-error --location --head --fail \
+            --connect-timeout 10 --max-time 15 "$asset_url" >/dev/null; then
+            echo "ERROR: Required asset not found for ${arch}: ${asset_url}" >&2
+            return 1
         fi
+
+        echo "Asset found for ${arch}" >&2
     done
-    
-    return 0
 }
 
 # Get latest release

@@ -1,20 +1,17 @@
 # Changelog
-All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased](https://github.com/hyperion-project/hyperion.ng/compare/2.0.14...HEAD)
-
-### Breaking
-
-### Added
+## [2.2.1](https://github.com/hyperion-project/hyperion.ng/releases/tag/2.2.1) - 2026-07-10
 
 ### Changed
 
-### Fixed
+- Updated Hyperion.NG to 2.2.1 and corrected release archive architecture mapping.
+- Moved to the generic multi-architecture image `docker.io/bradsjm/addon-hyperion-ng` with a pinned Debian base image.
+- Switched to host networking; the Web UI is available at host port 8090 and native Hyperion ports are no longer remappable.
+- Simplified runtime dependencies to match Hyperion 2.2.1's bundled libraries.
 
-## Removed
+### Removed
+
+- Removed 32-bit ARM support.
 
 ## [2.0.14](https://github.com/hyperion-project/hyperion.ng/releases/tag/2.0.14) - 2022-11
 

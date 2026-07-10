@@ -8,7 +8,6 @@ Use this file as the primary guide for agentic coding work here.
 - Add-on paths: `addon-hyperion-ng/`, `addon-opencode/`, `addon-openchamber/`
 - Core metadata: `repository.json`
 - Hyperion config: `addon-hyperion-ng/config.json`
-- Hyperion build metadata: `addon-hyperion-ng/build.json`
 - Hyperion container definition: `addon-hyperion-ng/Dockerfile`
 - Hyperion runtime entrypoint: `addon-hyperion-ng/run.sh`
 - OpenCode config: `addon-opencode/config.yaml`
@@ -28,14 +27,14 @@ Use the scripts below for validation and smoke testing.
 
 ### Build (local or CI-like)
 
-- Build add-on image for a single architecture:
-  `./.github/scripts/build.sh amd64`
+- Build the Hyperion image for amd64:
+  `docker buildx build --pull --platform linux/amd64 --build-arg BUILD_VERSION=2.2.1 --build-arg BUILD_ARCH=amd64 --load -t local/addon-hyperion-ng:2.2.1-amd64 addon-hyperion-ng`
+
+- Validate the Hyperion aarch64 build:
+  `docker buildx build --pull --platform linux/arm64 --build-arg BUILD_VERSION=2.2.1 --build-arg BUILD_ARCH=aarch64 --output type=cacheonly addon-hyperion-ng`
 
 - Build OpenCode add-on image for a single architecture:
   `./.github/scripts/build-opencode.sh amd64`
-
-- Build all architectures:
-  `./.github/scripts/build.sh all`
 
 - Build all OpenCode architectures:
   `./.github/scripts/build-opencode.sh all`
@@ -47,9 +46,7 @@ Use the scripts below for validation and smoke testing.
   `./.github/scripts/build-openchamber.sh all`
 
 Notes:
-- The build script uses `homeassistant/amd64-builder` in Docker.
-- It expects Docker credentials for push in CI via `DOCKER_USER` and `DOCKER_PASSWORD`.
-- In local use, you can omit those env vars if you are not pushing.
+- Hyperion CI uses the pinned `home-assistant/builder` composite actions to publish `docker.io/bradsjm/addon-hyperion-ng` as a multi-architecture manifest on pushes to `master`.
 
 ### Smoke Tests (single "test")
 
@@ -60,7 +57,7 @@ There is no formal test suite. Use the download script to validate release asset
 
 Examples:
 - `mkdir -p /tmp/hyperion-test`
-- `./addon-hyperion-ng/download-hyperion.sh 2.0.16 amd64 /tmp/hyperion-test`
+- `./addon-hyperion-ng/download-hyperion.sh 2.2.1 amd64 /tmp/hyperion-test`
 
 ### Version Update Helper
 
@@ -77,7 +74,7 @@ This script reads and updates `addon-hyperion-ng/config.json` using `jq`.
 - Prefer explicit, readable shell and Dockerfile steps over cleverness.
 - Do not introduce new tooling without a clear need.
 
-### JSON (config.json, build.json, repository.json)
+### JSON (config.json, repository.json)
 
 - Use 2-space indentation.
 - Keep keys sorted only if the file already uses a stable order.
@@ -95,7 +92,7 @@ This script reads and updates `addon-hyperion-ng/config.json` using `jq`.
 
 ### Dockerfile
 
-- Use build args already present (`BUILD_FROM`, `DOWNLOAD_URL`, `BUILD_VERSION`, `BUILD_ARCH`).
+- Use the explicit pinned Home Assistant Debian base and the `BUILD_VERSION` and `BUILD_ARCH` build arguments.
 - Keep package install steps consolidated and clean `apt` lists in the same layer.
 - Preserve existing validation steps after installation.
 - Do not remove verification of `hyperiond` installation.
@@ -110,7 +107,7 @@ This script reads and updates `addon-hyperion-ng/config.json` using `jq`.
 ### Imports / Dependencies
 
 - There are no language imports beyond shell and Docker.
-- Prefer existing tools: `curl`, `wget`, `jq`, `tar`, `gzip`.
+- Prefer existing tools: `curl`, `jq`, `tar`, `gzip`.
 - Do not add new dependencies to the base image without a strong reason.
 
 ### Error Handling
@@ -124,7 +121,7 @@ This script reads and updates `addon-hyperion-ng/config.json` using `jq`.
 
 - Update `addon-hyperion-ng/config.json` version when bumping Hyperion.
 - Ensure the release assets exist for all supported architectures.
-- Keep `build.json` base images aligned with Home Assistant base images.
+- Ensure the pinned Dockerfile base image supports both configured architectures.
 
 ## Project-Specific Conventions
 
@@ -135,7 +132,7 @@ This script reads and updates `addon-hyperion-ng/config.json` using `jq`.
 ## CI / GitHub Actions
 
 - Workflows in `.github/workflows/`: `addon-hyperion-ng.yml`, `addon-opencode.yml`, `addon-openchamber.yml`
-- CI validates latest release and optionally updates `config.json`.
+- Hyperion CI validates the configured release assets, builds each supported architecture, and publishes a generic manifest only from `master` pushes.
 - CI uses helper scripts in `.github/scripts/`.
 
 ## Cursor / Copilot Rules

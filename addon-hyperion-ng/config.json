@@ -1,37 +1,21 @@
 {
   "name": "Hyperion.NG",
-  "version": "2.0.16",
+  "version": "2.2.1",
   "slug": "hyperionng",
   "description": "Hyperion is an opensource Bias or Ambient Lighting implementation by the Hyperion-Project. This add-on is not supported or endorsed by the Hyperion Project and may not work with hardware capture cards or LED devices due to limitations of containers",
   "url": "https://hyperion-project.org/",
   "arch": [
     "amd64",
-    "armhf",
     "aarch64"
   ],
   "startup": "application",
   "apparmor": false,
   "boot": "auto",
-  "ports": {
-    "8090/tcp": 8090,
-    "8092/tcp": null,
-    "19333/tcp": 19333,
-    "19400/tcp": 19400,
-    "19444/tcp": 19444,
-    "19445/tcp": 19445
-  },
-  "ports_description": {
-    "8090/tcp": "Web Admin",
-    "8092/tcp": "SSL Web Admin",
-    "19333/tcp": "Boblight Server",
-    "19400/tcp": "Google Flatbuffers Receiver",
-    "19444/tcp": "JSON-RPC Remote Control",
-    "19445/tcp": "Protocol Buffers Server"
-  },
+  "host_network": true,
   "map": [
     "config:rw"
   ],
-  "image": "bradsjm/hyperion-ng-addon-{arch}",
+  "image": "docker.io/bradsjm/addon-hyperion-ng",
   "options": {},
   "schema": {},
   "privileged": [
@@ -49,6 +33,6 @@
     "/dev/fb0",
     "/dev/mem"
   ],
-  "webui": "http://[HOST]:[PORT:8090]",
+  "webui": "http://[HOST]:8090",
   "init": false
 }

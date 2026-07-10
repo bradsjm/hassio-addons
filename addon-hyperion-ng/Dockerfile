@@ -1,24 +1,19 @@
-ARG BUILD_FROM=homeassistant/amd64-base-debian
+FROM ghcr.io/home-assistant/base-debian:bookworm-2026.06.0
 
-FROM ${BUILD_FROM}
-ARG DOWNLOAD_URL
 ARG BUILD_VERSION
 ARG BUILD_ARCH
 
 ENV LANG=C.UTF-8
 RUN apt-get update && apt-get install -y --no-install-recommends \
-		libqt5widgets5 \
-		libqt5serialport5 \
-		libqt5sql5-sqlite \
-		libqt5x11extras5 \
 		libavahi-core7 \
 		libavahi-compat-libdnssd1 \
 		libusb-1.0-0 \
-		libjpeg-dev \
-		libssl1.1 \
+		libudev1 \
+		libexpat1 \
+		libfontconfig1 \
+		libglib2.0-0 \
 		zlib1g \
 		libcec6 \
-		wget \
 		curl \
 		v4l-utils \
 	&& rm -rf /var/lib/apt/lists/*
@@ -33,13 +28,16 @@ RUN echo "Installing Hyperion ${BUILD_VERSION} for ${BUILD_ARCH}..." && \
     # Final verification
     if [ -f /usr/bin/hyperiond ]; then \
         echo "Hyperion installation verified successfully"; \
-        /usr/bin/hyperiond --version || echo "Version check failed (may be normal)"; \
+        /usr/bin/hyperiond --version; \
     else \
         echo "ERROR: Hyperion daemon not found after installation" >&2; \
         echo "Searching for hyperion binaries..." && \
         find /usr -name "*hyperion*" -type f 2>/dev/null || true; \
         exit 1; \
-    fi
+    fi && \
+    ldd_output="$(ldd /usr/share/hyperion/bin/hyperiond)" && \
+    printf '%s\n' "$ldd_output" && \
+    ! printf '%s\n' "$ldd_output" | grep -F "not found"
 
 VOLUME /config
 EXPOSE 8090 8092 19333 19400 19444 19445
