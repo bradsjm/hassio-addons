@@ -16,8 +16,12 @@
     "config:rw"
   ],
   "image": "docker.io/bradsjm/addon-hyperion-ng",
-  "options": {},
-  "schema": {},
+  "options": {
+    "admin_password": ""
+  },
+  "schema": {
+    "admin_password": "password?"
+  },
   "privileged": [
     "SYS_ADMIN",
     "SYS_RAWIO"

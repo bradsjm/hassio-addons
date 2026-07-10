@@ -16,6 +16,10 @@ _Open-source bias and ambient lighting for Home Assistant._
 
 This add-on provides hardware-privileged access to video devices, SPI interfaces, and USB controllers for direct LED strip control from within Home Assistant.
 
+## Admin password
+
+Optionally set `admin_password` in the add-on configuration to bootstrap Hyperion's administrator password on its first start. Hyperion requires at least 8 characters. The add-on only changes the initial default password; if Hyperion already has a different password, it verifies the configured value and refuses to overwrite it when it does not match.
+
 ## Support
 
 Got questions?

@@ -8,6 +8,7 @@
 - Moved to the generic multi-architecture image `docker.io/bradsjm/addon-hyperion-ng` with a pinned Debian base image.
 - Switched to host networking; the Web UI is available at host port 8090 and native Hyperion ports are no longer remappable.
 - Simplified runtime dependencies to match Hyperion 2.2.1's bundled libraries.
+- Added optional first-start admin password bootstrap without rotating an existing non-default password.
 
 ### Removed
 

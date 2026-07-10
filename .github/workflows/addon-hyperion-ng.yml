@@ -52,7 +52,7 @@ jobs:
 
           bash -n addon-hyperion-ng/download-hyperion.sh
           bash -n .github/scripts/update-hyperion-version.sh
-          python3 addon-hyperion-ng/tests/test_migration.py
+          python3 -m unittest discover -s addon-hyperion-ng/tests -p 'test_*.py'
           jq empty addon-hyperion-ng/config.json
           jq -e '
             .arch == ["amd64", "aarch64"] and

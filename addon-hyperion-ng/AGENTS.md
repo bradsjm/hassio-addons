@@ -17,5 +17,6 @@
 ## Runtime Contract
 
 - Host networking exposes Hyperion's fixed listeners directly; the Web UI is `http://<host>:8090`. Resolve any host port conflicts before starting the add-on.
+- `admin_password` bootstraps only Hyperion's initial default password; preserve the refusal to replace an existing non-default password.
 - Preserve the existing privileged capabilities, UART/USB/video/GPIO settings, and device declarations.
 - Required device paths include video devices (`/dev/fb0`, `/dev/amvideo`, `/dev/vchiq`), SPI (`/dev/spidev0.0`), and memory (`/dev/mem`).
