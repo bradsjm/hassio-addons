@@ -174,7 +174,7 @@ class HyperionMigrationTests(unittest.TestCase):
         self.assertEqual(config["arch"], ["amd64", "aarch64"])
         self.assertIs(config["host_network"], True)
         self.assertEqual(config["image"], "docker.io/bradsjm/addon-hyperion-ng")
-        self.assertEqual(config["webui"], "http://[HOST]:8090")
+        self.assertEqual(config["webui"], "http://[HOST]:[PORT:8090]")
         self.assertNotIn("ports", config)
         self.assertNotIn("ports_description", config)
 

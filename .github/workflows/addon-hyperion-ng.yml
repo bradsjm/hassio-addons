@@ -60,7 +60,7 @@ jobs:
             (has("ports") | not) and
             (has("ports_description") | not) and
             .image == "docker.io/bradsjm/addon-hyperion-ng" and
-            .webui == "http://[HOST]:8090"
+            .webui == "http://[HOST]:[PORT:8090]"
           ' addon-hyperion-ng/config.json >/dev/null
 
   prepare:
