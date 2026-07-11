@@ -9,7 +9,7 @@ on:
       - .github/scripts/update-hyperion-version.sh
   push:
     branches:
-      - master
+      - main
     paths:
       - addon-hyperion-ng/**
       - addon-hyperion-ng/download-hyperion.sh
@@ -110,16 +110,16 @@ jobs:
             io.hass.name=Hyperion.NG
             io.hass.description=Hyperion is an opensource Bias or Ambient Lighting implementation by the Hyperion-Project. This add-on is not supported or endorsed by the Hyperion Project and may not work with hardware capture cards or LED devices due to limitations of containers
           container-registry: docker.io
-          container-registry-username: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master' && secrets.DOCKERHUB_USER) || 'unused' }}
-          container-registry-password: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master' && secrets.DOCKERHUB_PASSWORD) || 'unused' }}
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+          container-registry-username: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.DOCKERHUB_USER) || 'unused' }}
+          container-registry-password: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.DOCKERHUB_PASSWORD) || 'unused' }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
   publish:
     name: Publish multi-architecture manifest
     needs:
       - validate
       - build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.06.0
