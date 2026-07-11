@@ -10,7 +10,7 @@
 ## Releases and Builds
 
 - The generic published image is `docker.io/bradsjm/addon-hyperion-ng`.
-- The GitHub Actions workflow builds supported architectures with `home-assistant/builder` composite actions and publishes the multi-architecture manifest only on pushes to `master`.
+- The GitHub Actions workflow builds supported architectures with `home-assistant/builder` composite actions and publishes the multi-architecture manifest only on pushes to `main`.
 - When updating the version, verify both upstream `Linux-amd64` and `Linux-arm64` archives. The manual `update-hyperion-version.sh` helper validates them before changing `config.yaml`.
 - Preserve the required runtime packages and build-time `hyperiond --version` and `ldd` checks. Hyperion's archive provides its bundled libraries.
 
